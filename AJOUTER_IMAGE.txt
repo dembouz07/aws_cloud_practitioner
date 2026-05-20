@@ -1,0 +1,66 @@
+═══════════════════════════════════════════════════════════
+  COMMENT AJOUTER LA PHOTO DE LA PROMO 5
+═══════════════════════════════════════════════════════════
+
+📸 ÉTAPES SIMPLES :
+
+1. Prenez votre photo de groupe de la Promo 5
+   (celle que vous m'avez montrée)
+
+2. Renommez-la en : promo5.jpg
+
+3. Placez-la dans le même dossier que index.html
+   
+   Votre structure devrait ressembler à :
+   
+   📁 aws_cloud_practitioner/
+   ├── 📄 index.html
+   ├── 📄 exam-proctoring.js
+   ├── 🖼️ promo5.jpg  ← VOTRE IMAGE ICI
+   ├── 📄 README.md
+   └── ...
+
+4. Ouvrez index.html dans votre navigateur
+
+5. ✅ La photo apparaîtra en haut à droite !
+
+═══════════════════════════════════════════════════════════
+
+🎨 FORMATS ACCEPTÉS :
+- .jpg / .jpeg (recommandé)
+- .png
+- .webp
+
+📏 TAILLE RECOMMANDÉE :
+- Largeur : 800-1200 pixels
+- L'image sera automatiquement redimensionnée à 200px de large
+
+═══════════════════════════════════════════════════════════
+
+❓ SI VOUS VOULEZ UTILISER UN AUTRE NOM :
+
+Ouvrez index.html et cherchez (ligne ~607) :
+
+<img src="promo5.jpg" ...
+
+Remplacez "promo5.jpg" par le nom de votre fichier.
+
+Exemple :
+<img src="ma-photo-promo.png" ...
+
+═══════════════════════════════════════════════════════════
+
+🚀 POUR DÉPLOYER SUR VERCEL :
+
+1. Ajoutez l'image au projet :
+   git add promo5.jpg
+
+2. Commitez :
+   git commit -m "Ajout photo Promo 5"
+
+3. Poussez :
+   git push
+
+4. Vercel redéploiera automatiquement avec la photo !
+
+═══════════════════════════════════════════════════════════
