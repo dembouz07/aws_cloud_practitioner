@@ -76,6 +76,21 @@
       box-shadow: var(--shadow);
       min-height: 116px;
     }
+    .promo-photo {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(54, 65, 83, .15);
+      border: 2px solid var(--line);
+      object-fit: cover;
+    }
+    .promo-photo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
     .identity {
       display: grid;
       gap: 8px;
@@ -558,7 +573,7 @@
 <body>
   <!-- Bannière d'avertissement -->
   <div class="warning-banner" id="warningBanner">
-    ⚠️ AVERTISSEMENT : Comportement suspect détecté ! <span id="infractionText"></span>
+    AVERTISSEMENT : Comportement suspect détecté ! <span id="infractionText"></span>
   </div>
   
   <header class="app-header">
@@ -595,7 +610,7 @@
     <aside class="panel">
       <span class="exam-pill" style="margin-bottom: 12px;"><span class="dot"></span>Mode examen · 90 min</span>
       <div id="infractionCounter" style="display: none; margin-bottom: 12px;">
-        <span class="infraction-counter">⚠️ Infractions : <span id="infractionCount">0</span>/3</span>
+        <span class="infraction-counter">Infractions : <span id="infractionCount">0</span>/3</span>
       </div>
       <h2>Tableau de bord Promo 5</h2>
       <div class="timer" id="timer">90:00</div>
@@ -615,10 +630,10 @@
     <main class="main">
       <!-- Écran de démarrage -->
       <section class="hero" id="startScreen">
-        <h2>🎓 Prêt à commencer l'examen ?</h2>
+        <h2>Prêt à commencer l'examen ?</h2>
         <p>Vous allez passer un examen simulé de 65 questions en 90 minutes.</p>
         <div style="background: #fff4ec; border-left: 4px solid var(--aws-orange); padding: 16px; border-radius: 12px; margin: 16px 0;">
-          <strong style="color: var(--ink-2); display: block; margin-bottom: 8px;">⚠️ Règles de surveillance de l'examen :</strong>
+          <strong style="color: var(--ink-2); display: block; margin-bottom: 8px;">Règles de surveillance de l'examen :</strong>
           <ul style="margin: 8px 0; padding-left: 20px; line-height: 1.8;">
             <li>Le chronomètre démarre dès que vous cliquez sur "Commencer"</li>
             <li>Ne changez pas d'onglet pendant l'examen</li>
@@ -628,7 +643,7 @@
           </ul>
         </div>
         <button class="primary" id="startExamBtn" style="font-size: 18px; padding: 16px 32px; margin-top: 16px;">
-          🚀 Commencer l'examen
+          Commencer l'examen
         </button>
         <p class="small" style="margin-top: 16px; color: var(--muted);">
           Assurez-vous d'être dans un environnement calme et sans distraction.
@@ -660,7 +675,8 @@
     let current = 0;
     let finished = false;
     let selections = [];
-    let remainingSeconds = 90 * 60;
+    let remainingSeconds = parseInt(localStorage.getItem('remaining_seconds')) || 90 * 60;
+    window.remainingSeconds = remainingSeconds; // Exposer globalement pour exam-proctoring.js
     let drawCount = 0;
 
     const $ = sel => document.querySelector(sel);
@@ -768,6 +784,10 @@
 
     function finish() {
       finished = true;
+      // Nettoyer le localStorage quand l'examen est terminé
+      localStorage.removeItem('exam_started');
+      localStorage.removeItem('remaining_seconds');
+      localStorage.removeItem('infractions');
       const score = questions.reduce((sum, q, i) => sum + (isCorrect(i) ? 1 : 0), 0);
       const pct = Math.round(score / questions.length * 100);
       const byDomain = {};
@@ -780,8 +800,8 @@
       const passingScore = Math.ceil(questions.length * 0.70); // 70% pour réussir
       const passed = score >= passingScore;
       const statusBadge = passed 
-        ? `<div class="passing-score">✓ RÉUSSI - Score de passage: ${passingScore}/${questions.length} (70%)</div>`
-        : `<div class="failing-score">✗ ÉCHOUÉ - Score requis: ${passingScore}/${questions.length} (70%)</div>`;
+        ? `<div class="passing-score">RÉUSSI - Score de passage: ${passingScore}/${questions.length} (70%)</div>`
+        : `<div class="failing-score">ÉCHOUÉ - Score requis: ${passingScore}/${questions.length} (70%)</div>`;
       
       $('#resultBox').innerHTML = `
         <h2>Résultat Final</h2>
@@ -811,6 +831,8 @@
     function tick() {
       if (!finished && remainingSeconds > 0) {
         remainingSeconds--;
+        window.remainingSeconds = remainingSeconds; // Mettre à jour la variable globale
+        localStorage.setItem('remaining_seconds', remainingSeconds); // Sauvegarder dans localStorage
         updateTimerDisplay();
       }
       if (remainingSeconds === 0 && !finished) finish();
@@ -818,6 +840,27 @@
 
     function initializeExam(askConfirmation = false) {
       if (askConfirmation && !confirm('Réinitialiser le test et lancer un nouveau tirage de questions ?')) return;
+      
+      // Nettoyer le localStorage lors de la réinitialisation
+      if (askConfirmation) {
+        localStorage.removeItem('exam_started');
+        localStorage.removeItem('remaining_seconds');
+        localStorage.removeItem('infractions');
+        remainingSeconds = 90 * 60;
+        window.remainingSeconds = remainingSeconds;
+        
+        // Réafficher l'écran de démarrage
+        document.getElementById('startScreen').style.display = 'block';
+        document.getElementById('questionCard').style.display = 'none';
+        document.getElementById('infractionCounter').style.display = 'none';
+        
+        // Appeler clearExamState si disponible
+        if (typeof clearExamState === 'function') {
+          clearExamState();
+        }
+        return;
+      }
+      
       questions = buildExam();
       selections = questions.map(() => new Set());
       current = 0;

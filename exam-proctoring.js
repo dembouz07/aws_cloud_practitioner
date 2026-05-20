@@ -5,6 +5,62 @@ let examStarted = false;
 let infractions = 0;
 const MAX_INFRACTIONS = 3;
 
+// Clés de stockage
+const STORAGE_KEYS = {
+  EXAM_STARTED: 'exam_started',
+  REMAINING_SECONDS: 'remaining_seconds',
+  INFRACTIONS: 'infractions',
+  CURRENT_QUESTION: 'current_question',
+  USER_ANSWERS: 'user_answers',
+  EXAM_FINISHED: 'exam_finished',
+  START_TIME: 'start_time'
+};
+
+// Sauvegarder l'état dans localStorage
+function saveExamState() {
+  localStorage.setItem(STORAGE_KEYS.EXAM_STARTED, examStarted);
+  localStorage.setItem(STORAGE_KEYS.INFRACTIONS, infractions);
+  if (typeof remainingSeconds !== 'undefined') {
+    localStorage.setItem(STORAGE_KEYS.REMAINING_SECONDS, remainingSeconds);
+  }
+}
+
+// Restaurer l'état depuis localStorage
+function restoreExamState() {
+  const savedExamStarted = localStorage.getItem(STORAGE_KEYS.EXAM_STARTED);
+  const savedInfractions = localStorage.getItem(STORAGE_KEYS.INFRACTIONS);
+  const savedRemainingSeconds = localStorage.getItem(STORAGE_KEYS.REMAINING_SECONDS);
+  
+  if (savedExamStarted === 'true') {
+    examStarted = true;
+    infractions = parseInt(savedInfractions) || 0;
+    
+    // Masquer l'écran de démarrage
+    const startScreen = document.getElementById('startScreen');
+    const questionCard = document.getElementById('questionCard');
+    if (startScreen) startScreen.style.display = 'none';
+    if (questionCard) questionCard.style.display = 'block';
+    
+    // Afficher le compteur d'infractions
+    const infractionCounter = document.getElementById('infractionCounter');
+    const infractionCount = document.getElementById('infractionCount');
+    if (infractionCounter) infractionCounter.style.display = 'block';
+    if (infractionCount) infractionCount.textContent = infractions;
+    
+    // Restaurer le temps restant
+    if (savedRemainingSeconds && typeof window.remainingSeconds !== 'undefined') {
+      window.remainingSeconds = parseInt(savedRemainingSeconds);
+    }
+    
+    console.log('🔄 État de l\'examen restauré après actualisation');
+    
+    // Afficher un avertissement si l'utilisateur a actualisé
+    if (infractions < MAX_INFRACTIONS) {
+      recordInfraction('Actualisation de la page détectée');
+    }
+  }
+}
+
 // Créer un son d'alarme
 function createAlarmSound() {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -41,35 +97,51 @@ function recordInfraction(reason) {
   if (!examStarted) return;
   
   infractions++;
+  saveExamState(); // Sauvegarder après chaque infraction
+  
   const infractionCountEl = document.getElementById('infractionCount');
   const warningBanner = document.getElementById('warningBanner');
   const infractionText = document.getElementById('infractionText');
   
   // Mettre à jour le compteur
-  infractionCountEl.textContent = infractions;
-  document.getElementById('infractionCounter').style.display = 'block';
+  if (infractionCountEl) infractionCountEl.textContent = infractions;
+  const infractionCounter = document.getElementById('infractionCounter');
+  if (infractionCounter) infractionCounter.style.display = 'block';
   
   // Afficher la bannière d'avertissement
-  infractionText.textContent = `${reason} (${infractions}/${MAX_INFRACTIONS})`;
-  warningBanner.classList.add('show');
+  if (infractionText) infractionText.textContent = `${reason} (${infractions}/${MAX_INFRACTIONS})`;
+  if (warningBanner) warningBanner.classList.add('show');
   
   // Jouer l'alarme
   playAlarm();
   
   // Masquer la bannière après 5 secondes
   setTimeout(() => {
-    warningBanner.classList.remove('show');
+    if (warningBanner) warningBanner.classList.remove('show');
   }, 5000);
   
   // Si 3 infractions, terminer l'examen
   if (infractions >= MAX_INFRACTIONS) {
     setTimeout(() => {
-      alert('⛔ EXAMEN TERMINÉ\n\nVous avez commis 3 infractions. L\'examen est automatiquement terminé.\n\nRaison : Comportement suspect détecté.');
+      alert('EXAMEN TERMINÉ\n\nVous avez commis 3 infractions. L\'examen est automatiquement terminé.\n\nRaison : Comportement suspect détecté.');
       if (typeof submitExam === 'function') {
         submitExam();
+      } else if (typeof finish === 'function') {
+        finish();
       }
+      // Nettoyer le localStorage
+      clearExamState();
     }, 2000);
   }
+}
+
+// Nettoyer l'état de l'examen
+function clearExamState() {
+  Object.values(STORAGE_KEYS).forEach(key => {
+    localStorage.removeItem(key);
+  });
+  examStarted = false;
+  infractions = 0;
 }
 
 // Détecter le changement d'onglet
@@ -152,10 +224,21 @@ window.addEventListener('resize', function() {
   }
 });
 
+// Sauvegarder l'état toutes les secondes
+setInterval(() => {
+  if (examStarted) {
+    saveExamState();
+  }
+}, 1000);
+
 // Fonction pour démarrer l'examen
 function startExam() {
   examStarted = true;
   infractions = 0;
+  
+  // Sauvegarder l'état initial
+  localStorage.setItem(STORAGE_KEYS.START_TIME, Date.now());
+  saveExamState();
   
   // Masquer l'écran de démarrage
   document.getElementById('startScreen').style.display = 'none';
@@ -174,13 +257,30 @@ function startExam() {
     initializeExam(false);
   }
   
-  console.log('🎓 Examen démarré - Surveillance activée');
+  console.log('Examen démarré - Surveillance activée');
 }
 
 // Attacher l'événement au bouton de démarrage
 document.addEventListener('DOMContentLoaded', function() {
+  // Restaurer l'état si l'examen était en cours
+  restoreExamState();
+  
   const startBtn = document.getElementById('startExamBtn');
   if (startBtn) {
     startBtn.addEventListener('click', startExam);
   }
+  
+  // Démarrer le timer si l'examen était en cours
+  if (examStarted && typeof startTimer === 'function') {
+    startTimer();
+  }
+  
+  // Réinitialiser l'examen si nécessaire
+  if (examStarted && typeof initializeExam === 'function') {
+    initializeExam(false);
+  }
 });
+
+// Exposer les fonctions globalement
+window.clearExamState = clearExamState;
+window.saveExamState = saveExamState;
