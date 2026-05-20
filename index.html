@@ -316,6 +316,18 @@
       gap: 12px;
     }
     .question-head strong { color: var(--ink-2); }
+    .points-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(255, 153, 0, .12);
+      color: var(--aws-orange);
+      border: 1px solid rgba(255, 153, 0, .28);
+      margin-left: 8px;
+    }
     .tag {
       display: inline-block;
       padding: 7px 11px;
@@ -427,6 +439,34 @@
       font-weight: 900;
       color: var(--ink-2);
     }
+    .score-detail {
+      font-size: 18px;
+      color: var(--muted);
+      margin-top: 8px;
+      font-weight: 600;
+    }
+    .passing-score {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      margin-top: 12px;
+      background: rgba(31, 138, 76, .10);
+      color: var(--green);
+      border: 1px solid rgba(31, 138, 76, .28);
+    }
+    .failing-score {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      margin-top: 12px;
+      background: rgba(180, 35, 24, .10);
+      color: var(--red);
+      border: 1px solid rgba(180, 35, 24, .28);
+    }
     .domain-results {
       margin-top: 12px;
       display: grid;
@@ -517,13 +557,13 @@
       <div class="progress"><div id="progressBar"></div></div>
       <div class="meta-grid">
         <div class="meta"><strong id="answeredCount">0</strong><span>répondues</span></div>
-        <div class="meta"><strong id="totalCount">65</strong><span>questions tirées</span></div>
+        <div class="meta"><strong id="totalCount">65</strong><span>questions (65 pts)</span></div>
       </div>
-      <div class="domain-chip">D1 Concepts du cloud - 16 questions</div>
+      <div class="domain-chip">D1 Concepts du cloud - 16 questions (16 pts)</div>
       <div class="domain-chip">Nouveau tirage à chaque réinitialisation</div>
-      <div class="domain-chip">D2 Sécurité et conformité - 19 questions</div>
-      <div class="domain-chip">D3 Technologies, IA/ML et services - 22 questions</div>
-      <div class="domain-chip">D4 Facturation et support - 8 questions</div>
+      <div class="domain-chip">D2 Sécurité et conformité - 19 questions (19 pts)</div>
+      <div class="domain-chip">D3 Technologies, IA/ML et services - 22 questions (22 pts)</div>
+      <div class="domain-chip">D4 Facturation et support - 8 questions (8 pts)</div>
       <div class="question-nav" id="questionNav"></div>
       <p class="small">QRM = plusieurs réponses. À chaque réinitialisation, l'ordre change et un nouveau lot de questions est tiré d'une banque enrichie. Le score du simulateur est indicatif.</p>
     </aside>
@@ -609,7 +649,7 @@
       const typeLabel = multiple ? `QRM - ${q.answers.length} réponses` : 'QCM - 1 réponse';
       questionCard.innerHTML = `
         <div class="question-head">
-          <div><strong>Question ${current + 1} / ${questions.length}</strong><br><span class="small">${q.domain}</span></div>
+          <div><strong>Question ${current + 1} / ${questions.length}</strong><span class="points-badge">1 point</span><br><span class="small">${q.domain}</span></div>
           <span class="tag">${typeLabel}</span>
         </div>
         <div class="question-body">
@@ -671,14 +711,22 @@
         if (isCorrect(i)) byDomain[q.domain].ok++;
       });
       const advice = pct >= 75 ? 'Très bon niveau pour continuer avec des questions officielles et des labs.' : pct >= 65 ? 'Niveau encourageant : révise les domaines faibles puis refais un test.' : 'Reprends les fondamentaux avant de refaire une simulation complète.';
+      const passingScore = Math.ceil(questions.length * 0.70); // 70% pour réussir
+      const passed = score >= passingScore;
+      const statusBadge = passed 
+        ? `<div class="passing-score">✓ RÉUSSI - Score de passage: ${passingScore}/${questions.length} (70%)</div>`
+        : `<div class="failing-score">✗ ÉCHOUÉ - Score requis: ${passingScore}/${questions.length} (70%)</div>`;
+      
       $('#resultBox').innerHTML = `
-        <h2>Résultat</h2>
-        <div class="score">${score} / ${questions.length} <span class="small">(${pct}%)</span></div>
-        <p>${advice}</p>
+        <h2>Résultat Final</h2>
+        <div class="score">${score} / ${questions.length}</div>
+        <div class="score-detail">${pct}% de bonnes réponses</div>
+        ${statusBadge}
+        <p style="margin-top: 16px;">${advice}</p>
         <div class="domain-results">
-          ${Object.entries(byDomain).map(([d, r]) => `<div class="domain-chip"><strong>${d}</strong> : ${r.ok} / ${r.total}</div>`).join('')}
+          ${Object.entries(byDomain).map(([d, r]) => `<div class="domain-chip"><strong>${d}</strong> : ${r.ok} / ${r.total} points (${Math.round(r.ok/r.total*100)}%)</div>`).join('')}
         </div>
-        <p class="small">Note : l'examen officiel utilise un score échelonné. Ce pourcentage sert uniquement à l'entraînement.</p>
+        <p class="small">Note : Dans l'examen AWS officiel, chaque question vaut 1 point. Le score de passage est de 70% (46/65 points). L'examen utilise un score échelonné de 100-1000, avec 720 comme score minimum de réussite.</p>
       `;
       $('#resultBox').classList.add('show');
       renderQuestion();
