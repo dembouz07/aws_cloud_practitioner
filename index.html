@@ -84,12 +84,28 @@
       box-shadow: 0 4px 12px rgba(54, 65, 83, .15);
       border: 2px solid var(--line);
       object-fit: cover;
+      animation: fadeInZoom 1s ease-out;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .promo-photo:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px rgba(54, 65, 83, .25);
     }
     .promo-photo-container {
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 8px;
+    }
+    @keyframes fadeInZoom {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
     .identity {
       display: grid;
