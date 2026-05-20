@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orange Digital Center AWS Promo 5 - Simulateur Cloud Practitioner</title>
+  <style>
+    :root {
+      --odc-orange: #ff7010;
+      --odc-orange-2: #ff7900;
+      --odc-teal: #12b7a0;
+      --odc-teal-dark: #079987;
+      --ink: #364153;
+      --ink-2: #2b3345;
+      --muted: #7b8494;
+      --line: #d5dbe3;
+      --soft: #f8f8f8;
+      --card: #ffffff;
+      --aws-dark: #232f3e;
+      --aws-orange: #ff9900;
+      --green: #1f8a4c;
+      --red: #b42318;
+      --shadow: 0 18px 42px rgba(54, 65, 83, .14);
+      --shadow-soft: 0 10px 22px rgba(54, 65, 83, .10);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(255, 112, 16, .10), transparent 32%),
+        radial-gradient(circle at 94% 5%, rgba(18, 183, 160, .13), transparent 30%),
+        linear-gradient(180deg, #fbfbfb, #f2f4f7 60%, #eef1f5);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .app-header {
+      padding: 12px 14px 0;
+      position: static;
+      background: transparent;
+    }
+    .brand-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      position: relative;
+      isolation: isolate;
+      padding: 0 0 8px;
+    }
+    .brand-shell::before,
+    .brand-shell::after {
+      content: "";
+      position: absolute;
+      border-radius: 28px;
+      z-index: -1;
+    }
+    .brand-shell::before {
+      inset: -10px 48px 10px -10px;
+      background: var(--odc-orange);
+      box-shadow: 0 16px 30px rgba(255, 112, 16, .22);
+    }
+    .brand-shell::after {
+      inset: 12px -10px -2px 56px;
+      background: var(--odc-teal);
+      box-shadow: 0 16px 30px rgba(18, 183, 160, .20);
+    }
+    .brand-card {
+      background: var(--card);
+      border: 1px solid rgba(213, 219, 227, .92);
+      border-radius: 22px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow);
+      min-height: 116px;
+    }
+    .identity {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+    .logo-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .logo-chip {
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid #edf0f4;
+      border-radius: 18px;
+      padding: 8px 12px;
+      box-shadow: 0 8px 18px rgba(54, 65, 83, .08);
+    }
+    .sonatel-logo img {
+      display: block;
+      width: min(220px, 38vw);
+      height: auto;
+    }
+    .aws-logo svg {
+      display: block;
+      width: 92px;
+      height: 42px;
+    }
+    .brand-title {
+      display: grid;
+      gap: 4px;
+    }
+    .brand-title .eyebrow {
+      margin: 0;
+      color: var(--ink);
+      font-size: 12px;
+      letter-spacing: .02em;
+    }
+    .brand-title h1 {
+      margin: 0;
+      color: var(--odc-orange);
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.05;
+      letter-spacing: -.035em;
+    }
+    .brand-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .header-actions {
+      display: grid;
+      justify-items: end;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .exam-pill,
+    .promo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: var(--shadow-soft);
+    }
+    .exam-pill {
+      background: var(--ink-2);
+      color: white;
+    }
+    .promo-pill {
+      background: rgba(18, 183, 160, .10);
+      color: var(--odc-teal-dark);
+      border: 1px solid rgba(18, 183, 160, .28);
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--odc-orange);
+      box-shadow: 0 0 0 6px rgba(255, 112, 16, .16);
+    }
+    .layout {
+      max-width: 1180px;
+      margin: 10px auto 28px;
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: 18px;
+      padding: 0 18px;
+    }
+    .panel, .question-card, .hero, .result {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
+    }
+    .panel {
+      padding: 18px;
+      position: sticky;
+      top: 14px;
+      max-height: calc(100vh - 28px);
+      overflow: auto;
+      border-top: 6px solid var(--odc-orange);
+    }
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      color: var(--ink-2);
+    }
+    .timer {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin: 12px 0;
+      color: var(--ink-2);
+    }
+    .progress {
+      height: 11px;
+      background: #eef1f5;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 14px 0;
+    }
+    .progress > div {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--odc-orange), var(--odc-teal));
+      transition: width .2s ease;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .meta {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px;
+      background: #fbfcfd;
+    }
+    .meta strong {
+      display:block;
+      font-size: 20px;
+      color: var(--ink-2);
+    }
+    .meta span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .domain-chip {
+      font-size: 12px;
+      border-left: 5px solid var(--odc-orange);
+      background: #fff4ec;
+      padding: 10px 11px;
+      border-radius: 12px;
+      margin: 8px 0;
+      color: var(--ink);
+    }
+    .domain-chip:nth-of-type(odd) {
+      border-left-color: var(--odc-teal);
+      background: #ebfbf8;
+    }
+    .question-nav {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      margin-top: 14px;
+    }
+    .qbtn {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: white;
+      padding: 8px 0;
+      cursor: pointer;
+      font-weight: 800;
+      color: var(--ink-2);
+      transition: transform .12s ease, border .12s ease, background .12s ease;
+    }
+    .qbtn:hover { transform: translateY(-1px); border-color: var(--odc-teal); }
+    .qbtn.active {
+      outline: 3px solid rgba(255, 112, 16, .25);
+      border-color: var(--odc-orange);
+    }
+    .qbtn.answered {
+      background: #e7fbf7;
+      border-color: rgba(18, 183, 160, .50);
+    }
+    .qbtn.correct {
+      background: #e9f7ef;
+      border-color: #8ed3aa;
+    }
+    .qbtn.incorrect {
+      background: #fff0ee;
+      border-color: #f2aaa4;
+    }
+    .main { min-width: 0; }
+    .hero {
+      padding: 20px 22px;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: linear-gradient(180deg, var(--odc-orange), var(--odc-teal));
+    }
+    .hero h2 {
+      margin: 0 0 7px;
+      color: var(--ink-2);
+      font-size: 22px;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .question-card {
+      padding: 0;
+      overflow: hidden;
+    }
+    .question-head {
+      padding: 16px 20px;
+      background: linear-gradient(90deg, #fff4ec, #ebfbf8);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .question-head strong { color: var(--ink-2); }
+    .tag {
+      display: inline-block;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid rgba(18, 183, 160, .28);
+      background: white;
+      color: var(--odc-teal-dark);
+      font-weight: 800;
+    }
+    .question-body { padding: 23px; }
+    .question-text {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.38;
+      color: var(--ink-2);
+      margin-bottom: 18px;
+    }
+    .option {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 15px;
+      margin: 10px 0;
+      background: #fff;
+      cursor: pointer;
+      transition: border .12s ease, transform .12s ease, background .12s ease, box-shadow .12s ease;
+    }
+    .option:hover {
+      border-color: var(--odc-teal);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(18, 183, 160, .10);
+    }
+    .option input {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--odc-orange);
+    }
+    .option.correct { border-color: #58b47c; background: #eefaf3; }
+    .option.incorrect { border-color: #e08478; background: #fff3f1; }
+    .option.missed { border-color: #ffb866; background: #fff7ec; }
+    .explanation {
+      display: none;
+      border-left: 6px solid var(--odc-orange);
+      background: #fff7ec;
+      padding: 15px 16px;
+      border-radius: 14px;
+      margin-top: 18px;
+      line-height: 1.48;
+    }
+    .explanation.show { display: block; }
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .controls > div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button.primary, button.secondary, button.danger {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 17px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    }
+    button.primary {
+      background: var(--odc-orange);
+      color: white;
+      box-shadow: 0 10px 18px rgba(255, 112, 16, .24);
+    }
+    button.secondary {
+      background: var(--odc-teal);
+      color: white;
+      box-shadow: 0 10px 18px rgba(18, 183, 160, .22);
+    }
+    button.danger {
+      background: #fff4ec;
+      color: var(--odc-orange);
+      border: 1px solid rgba(255, 112, 16, .28);
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-soft);
+    }
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .result {
+      display: none;
+      margin-top: 18px;
+      padding: 20px;
+    }
+    .result.show { display: block; }
+    .score {
+      font-size: 44px;
+      font-weight: 900;
+      color: var(--ink-2);
+    }
+    .domain-results {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    @media (max-width: 960px) {
+      .app-header { position: static; }
+      .brand-card {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+      .header-actions {
+        justify-items: start;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .layout { grid-template-columns: 1fr; }
+      .panel {
+        position: static;
+        max-height: none;
+      }
+    }
+    @media (max-width: 600px) {
+      .brand-shell::before { inset: -10px 42px 18px -10px; }
+      .brand-shell::after { inset: 20px -10px -2px 44px; }
+      .brand-card { padding: 18px; border-radius: 22px; }
+      .logo-chip { min-height: 42px; padding: 8px 10px; }
+      .aws-logo svg { width: 94px; }
+      .brand-title h1 { font-size: 28px; }
+      .layout { padding: 0 12px; margin-top: 16px; }
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .controls > div { flex-direction: column; align-items: stretch; }
+      button.primary, button.secondary, button.danger { width: 100%; }
+      .question-text { font-size: 18px; }
+    }
+    @media print {
+      .app-header, .panel, .controls, .hero { display: none; }
+      .layout { display:block; margin:0; padding:0; }
+      .question-card { box-shadow:none; border:0; }
+      .option { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand-shell">
+      <div class="brand-card">
+        <div class="identity">
+          <div class="logo-row" aria-label="Logos Sonatel et AWS">
+            <div class="logo-chip sonatel-logo">
+              <img src="data:image/png;base64,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" alt="Logo Sonatel Orange Digital Center" />
+            </div>
+            <div class="logo-chip aws-logo" aria-label="Logo AWS">
+              <svg viewBox="0 0 140 70" role="img" aria-labelledby="awsTitle">
+                <title id="awsTitle">AWS</title>
+                <text x="12" y="39" fill="#232f3e" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="800" letter-spacing="-2">aws</text>
+                <path d="M39 51 C58 63, 94 60, 117 44" fill="none" stroke="#ff9900" stroke-width="5" stroke-linecap="round"/>
+                <path d="M111 42 L126 41 L118 54" fill="none" stroke="#ff9900" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="brand-title">
+            <p class="eyebrow">Bienvenue sur l'application de test</p>
+            <h1>Orange Digital Center AWS Promo 5</h1>
+            <p>Simulateur AWS Certified Cloud Practitioner CLF-C02 · 65 questions aléatoires · IA/ML et analytics inclus</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <span class="exam-pill"><span class="dot"></span>Mode examen · 90 min</span>
+          <span class="promo-pill">Design Sonatel · Orange & turquoise</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="panel">
+      <h2>Tableau de bord Promo 5</h2>
+      <div class="timer" id="timer">90:00</div>
+      <div class="progress"><div id="progressBar"></div></div>
+      <div class="meta-grid">
+        <div class="meta"><strong id="answeredCount">0</strong><span>répondues</span></div>
+        <div class="meta"><strong id="totalCount">65</strong><span>questions tirées</span></div>
+      </div>
+      <div class="domain-chip">D1 Concepts du cloud - 16 questions</div>
+      <div class="domain-chip">Nouveau tirage à chaque réinitialisation</div>
+      <div class="domain-chip">D2 Sécurité et conformité - 19 questions</div>
+      <div class="domain-chip">D3 Technologies, IA/ML et services - 22 questions</div>
+      <div class="domain-chip">D4 Facturation et support - 8 questions</div>
+      <div class="question-nav" id="questionNav"></div>
+      <p class="small">QRM = plusieurs réponses. À chaque réinitialisation, l'ordre change et un nouveau lot de questions est tiré d'une banque enrichie. Le score du simulateur est indicatif.</p>
+    </aside>
+    <main class="main">
+      
+      <section class="question-card" id="questionCard"></section>
+      <div class="controls">
+        <button class="secondary" id="prevBtn">Précédent</button>
+        <div>
+          <button class="danger" id="resetBtn">Réinitialiser</button>
+          <button class="primary" id="finishBtn">Terminer le test</button>
+        </div>
+        <button class="secondary" id="nextBtn">Suivant</button>
+      </div>
+      <section class="result" id="resultBox"></section>
+    </main>
+  </div>
+  <script>
+    const questionPool = [{"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Une entreprise lance une application de vente en ligne qui connait des pics de trafic imprévisibles. Quel avantage du cloud AWS permet d'ajouter et de retirer automatiquement des ressources selon la demande ?", "options": ["Haute disponibilité", "Elasticité", "Gouvernance centralisée", "Archivage a froid"], "answers": [1], "explanation": "L'élasticité permet de faire varier la capacité selon la demande, par exemple avec Auto Scaling ou des services serverless."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quelle affirmation décrit le mieux une Availability Zone AWS ?", "options": ["Un emplacement de périphérie utilisé uniquement par Amazon CloudFront", "Un ou plusieurs datacenters distincts dans une région AWS", "Un compte AWS séparé dans AWS Organizations", "Une copie exacte d'une région AWS dans un autre pays"], "answers": [1], "explanation": "Une Availability Zone regroupe un ou plusieurs datacenters séparés, reliés avec une faible latence au sein d'une même région."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "multiple", "question": "Quelles propositions représentent des avantages typiques du cloud AWS ? Choisissez 2 réponses.", "options": ["Remplacer les dépenses d'investissement initiales par un modèle de paiement a l'usage", "Garantir que toutes les applications deviennent automatiquement sans panne", "Bénéficier d'économies d'échelle", "Supprimer toute responsabilité de sécurité du client", "Obliger les charges de travail a rester dans une seule région"], "answers": [0, 2], "explanation": "Le cloud aide a passer d'un modèle CapEx a un modèle OpEx et a bénéficier d'économies d'échelle. La sécurité reste partagée."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel pilier du AWS Well-Architected Framework traite principalement de la capacité d'un système a fonctionner correctement et a se remettre des défaillances ?", "options": ["Excellence opérationnelle", "Fiabilité", "Optimisation des coûts", "Efficacité des performances"], "answers": [1], "explanation": "Le pilier Fiabilité couvre la reprise après incident, la tolérance aux pannes et l'adaptation aux changements de demande."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Une équipe souhaite expérimenter rapidement un nouveau service sans acheter de serveurs. Quel avantage du cloud est le plus directement concerné ?", "options": ["Agilité", "Durabilité des objets", "Chiffrement symétrique", "Archivage légal"], "answers": [0], "explanation": "L'agilité correspond a la capacité de provisionner rapidement des ressources et d'expérimenter avec moins de friction."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel principe de conception AWS aide a réduire l'impact d'une défaillance d'un composant sur l'ensemble de l'application ?", "options": ["Coupler fortement toutes les couches", "Concevoir avec des composants faiblement couplés", "Utiliser un seul serveur plus puissant", "Désactiver la journalisation pour réduire la charge"], "answers": [1], "explanation": "Des composants faiblement couplés rendent l'application plus résiliente et facilitent l'évolution indépendante de chaque partie."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Pourquoi déployer une application sur plusieurs Availability Zones ?", "options": ["Pour réduire le besoin de sauvegardes", "Pour améliorer la disponibilité et la tolérance aux pannes", "Pour éviter de payer les ressources utilisées", "Pour remplacer IAM par des règles réseau"], "answers": [1], "explanation": "Un déploiement Multi-AZ permet de continuer a servir les utilisateurs si une zone rencontre un problème."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel terme décrit la capacité d'un système a augmenter ses ressources pour gérer plus de charge ?", "options": ["Scalabilité", "Traçabilité", "Federation", "Rotation des clés"], "answers": [0], "explanation": "La scalabilité est la capacité a augmenter ou diminuer la capacité pour répondre a la demande."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "multiple", "question": "Quelles pratiques sont alignées avec une architecture fiable dans AWS ? Choisissez 2 réponses.", "options": ["Tester les procédures de reprise", "Déployer tous les composants dans une seule Availability Zone", "Automatiser la récupération lorsque c'est possible", "Utiliser le compte root pour les opérations quotidiennes", "Supprimer les métriques pour simplifier l'exploitation"], "answers": [0, 2], "explanation": "La fiabilité est renforcée par les tests de reprise, l'automatisation et la conception tolérante aux pannes."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel avantage financier est souvent associé au cloud par rapport a un datacenter traditionnel ?", "options": ["Obligation de surprovisionner pour trois ans", "Paiement a l'utilisation et réduction des achats initiaux", "Aucune analyse des coûts nécessaire", "Licences logicielles toujours gratuites"], "answers": [1], "explanation": "AWS permet de payer les ressources consommées, ce qui réduit le besoin d'achats initiaux de matériel."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Une société veut rapprocher le contenu statique de ses utilisateurs mondiaux pour réduire la latence. Quelle approche cloud est la plus adaptée ?", "options": ["Utiliser des emplacements de périphérie avec un CDN", "Utiliser uniquement une base de données relationnelle", "Créer un seul sous-réseau privé", "Désactiver le cache navigateur"], "answers": [0], "explanation": "Les emplacements de périphérie et un CDN comme CloudFront rapprochent le contenu des utilisateurs finaux."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel énoncé correspond a l'idée de 'ne plus deviner la capacité' ?", "options": ["Acheter toujours plus de serveurs que nécessaire", "Provisionner et ajuster la capacité selon les besoins réels", "Interdire les tests de charge", "Utiliser une seule taille d'instance pour toute application"], "answers": [1], "explanation": "Le cloud permet d'éviter le surprovisionnement permanent en ajustant la capacité aux besoins observés."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel pilier du Well-Architected Framework cherche a utiliser les ressources de calcul de manière efficace pour répondre aux exigences du système ?", "options": ["Sécurité", "Fiabilité", "Efficacité des performances", "Excellence opérationnelle"], "answers": [2], "explanation": "L'efficacité des performances concerne la sélection et l'utilisation efficace des ressources pour répondre aux besoins."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Dans une stratégie de migration, que signifie généralement 'rehost' ?", "options": ["Réécrire entièrement l'application avec des microservices", "Déplacer l'application avec peu de changements, souvent appelé lift-and-shift", "Remplacer l'application par un SaaS", "Supprimer définitivement l'application"], "answers": [1], "explanation": "Le rehosting consiste a déplacer une application vers le cloud avec peu de modifications."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "multiple", "question": "Quelles questions relèvent du pilier Optimisation des coûts ? Choisissez 2 réponses.", "options": ["Utilise-t-on le bon modèle de tarification ?", "Les données sensibles sont-elles chiffrées ?", "Les ressources inutilisées sont-elles arrêtées ou supprimées ?", "Le code source est-il écrit en Java ?", "Combien de comptes IAM root existent par région ?"], "answers": [0, 2], "explanation": "L'optimisation des coûts consiste a choisir les bons modèles de tarification et a éviter les ressources inutilisées."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quelle métrique aide a définir le temps maximal acceptable pour restaurer un service après incident ?", "options": ["RTO", "CIDR", "TTL", "ARN"], "answers": [0], "explanation": "Le RTO, Recovery Time Objective, représente le délai cible de restauration après incident."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Selon le modèle de responsabilité partagée, de quoi AWS est-il généralement responsable ?", "options": ["La configuration des groupes de sécurité du client", "La sécurité physique des datacenters AWS", "La gestion des utilisateurs IAM du client", "La classification des données applicatives"], "answers": [1], "explanation": "AWS est responsable de la sécurité du cloud, notamment l'infrastructure physique et les services sous-jacents."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quelle bonne pratique IAM applique le principe du moindre privilège ?", "options": ["Accorder AdministratorAccess a tous les utilisateurs", "Donner uniquement les permissions nécessaires a une tâche", "Partager les clés d'accès entre équipes", "Utiliser le compte root pour toutes les opérations"], "answers": [1], "explanation": "Le moindre privilège consiste a accorder seulement les permissions nécessaires, pas plus."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel mécanisme ajoute une couche de sécurité au processus de connexion en demandant un code ou un facteur supplémentaire ?", "options": ["MFA", "CIDR", "NAT", "SLA"], "answers": [0], "explanation": "L'authentification multifacteur, MFA, renforce la sécurité des connexions."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service permet d'appliquer des politiques de contrôle de service, SCP, sur plusieurs comptes AWS ?", "options": ["AWS Organizations", "AWS Lambda", "Amazon CloudFront", "AWS Glue"], "answers": [0], "explanation": "AWS Organizations permet de gérer plusieurs comptes et d'utiliser des SCP pour définir des limites de permissions."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service AWS est principalement utilisé pour créer et gérer des clés de chiffrement ?", "options": ["AWS Key Management Service", "Amazon Route 53", "AWS Direct Connect", "Amazon SQS"], "answers": [0], "explanation": "AWS KMS permet de créer, gérer et utiliser des clés cryptographiques pour chiffrer les données."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Une application doit stocker et faire tourner automatiquement des identifiants de base de données. Quel service est le plus adapté ?", "options": ["AWS Secrets Manager", "AWS CloudTrail", "Amazon Athena", "Amazon EFS"], "answers": [0], "explanation": "AWS Secrets Manager stocke les secrets et peut automatiser la rotation de certains identifiants."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "multiple", "question": "Quels services peuvent aider a protéger une application web contre des attaques courantes ou des attaques DDoS ? Choisissez 2 réponses.", "options": ["AWS WAF", "AWS Shield", "AWS Budgets", "AWS Glue", "Amazon Redshift"], "answers": [0, 1], "explanation": "AWS WAF filtre les requêtes web malveillantes et AWS Shield aide a protéger contre les attaques DDoS."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service enregistre les appels d'API et les actions effectuées dans un compte AWS ?", "options": ["AWS CloudTrail", "Amazon CloudWatch Logs uniquement pour les métriques CPU", "Amazon Route 53", "AWS Marketplace"], "answers": [0], "explanation": "AWS CloudTrail enregistre l'activité API et aide aux audits, enquêtes et exigences de conformité."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service utilise l'analyse intelligente pour détecter des menaces potentielles comme des comportements inhabituels ou malveillants ?", "options": ["Amazon GuardDuty", "Amazon S3 Glacier", "AWS Pricing Calculator", "Amazon Lightsail"], "answers": [0], "explanation": "Amazon GuardDuty est un service de détection des menaces qui analyse plusieurs sources de données AWS."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service suit les configurations de ressources AWS et peut évaluer leur conformité a des règles ?", "options": ["AWS Config", "AWS CodeCommit", "Amazon Polly", "AWS Snowball"], "answers": [0], "explanation": "AWS Config enregistre les changements de configuration et peut vérifier la conformité via des règles."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Où un client peut-il accéder a certains rapports de conformité et accords AWS, comme des rapports SOC ?", "options": ["AWS Artifact", "AWS CloudShell", "Amazon Macie", "AWS Compute Optimizer"], "answers": [0], "explanation": "AWS Artifact fournit un accès a des rapports de conformité et a certains documents contractuels."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service aide a découvrir et protéger des données sensibles, comme des informations personnelles, dans Amazon S3 ?", "options": ["Amazon Macie", "AWS Transit Gateway", "Amazon ElastiCache", "AWS App Runner"], "answers": [0], "explanation": "Amazon Macie utilise l'apprentissage automatique et des règles pour découvrir des données sensibles dans S3."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "multiple", "question": "Quelles différences sont correctes entre Security Groups et Network ACLs ? Choisissez 2 réponses.", "options": ["Les Security Groups sont généralement stateful", "Les Network ACLs s'appliquent au niveau du sous-réseau", "Les Security Groups s'appliquent uniquement aux factures", "Les Network ACLs remplacent IAM pour l'authentification", "Les Security Groups ne peuvent jamais contrôler le trafic entrant"], "answers": [0, 1], "explanation": "Les Security Groups sont stateful et associés aux ressources; les Network ACLs s'appliquent aux sous-réseaux et sont stateless."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Une instance EC2 doit lire des objets dans un bucket S3 sans stocker de clés d'accès dans le code. Quelle approche est recommandée ?", "options": ["Attribuer un rôle IAM a l'instance EC2", "Copier les clés du compte root dans un fichier", "Partager un mot de passe IAM par e-mail", "Rendre le bucket public"], "answers": [0], "explanation": "Un rôle IAM fournit des identifiants temporaires a l'instance sans stocker de secrets longue durée."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "multiple", "question": "Quelles actions sont de bonnes pratiques pour le compte root AWS ? Choisissez 2 réponses.", "options": ["Activer MFA sur le compte root", "Utiliser le compte root pour les tâches quotidiennes", "Créer des utilisateurs ou rôles IAM pour les opérations courantes", "Partager le mot de passe root avec l'équipe support", "Désactiver toutes les notifications de sécurité"], "answers": [0, 2], "explanation": "Le compte root doit être protégé par MFA et évité pour les opérations quotidiennes."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service permet de gérer l'accès centralisé des utilisateurs a plusieurs comptes AWS et applications via une authentification unique ?", "options": ["AWS IAM Identity Center", "Amazon VPC", "AWS Snowcone", "Amazon Kinesis Data Firehose"], "answers": [0], "explanation": "AWS IAM Identity Center permet la gestion centralisée des accès et l'authentification unique sur plusieurs comptes et applications."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service évalue automatiquement les charges de travail pour rechercher des vulnérabilités logicielles et expositions réseau ?", "options": ["Amazon Inspector", "Amazon Route 53", "AWS Backup", "AWS Cost Explorer"], "answers": [0], "explanation": "Amazon Inspector effectue des évaluations automatisées de vulnérabilités sur certaines ressources et charges de travail."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service est adapté pour ajouter l'inscription, la connexion et la gestion d'identité des utilisateurs finaux d'une application mobile ou web ?", "options": ["Amazon Cognito", "AWS CloudFormation", "Amazon EBS", "AWS Snowball"], "answers": [0], "explanation": "Amazon Cognito fournit des fonctionnalités d'identité pour les utilisateurs finaux d'applications web ou mobiles."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service agrège et priorise des résultats de sécurité provenant de plusieurs services AWS et partenaires ?", "options": ["AWS Security Hub", "Amazon SQS", "AWS Elastic Beanstalk", "AWS DataSync"], "answers": [0], "explanation": "AWS Security Hub centralise les résultats de sécurité et aide a évaluer la posture de sécurité."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service fournit des serveurs virtuels redimensionnables dans le cloud AWS ?", "options": ["Amazon EC2", "Amazon S3", "AWS IAM", "Amazon Route 53"], "answers": [0], "explanation": "Amazon EC2 fournit des instances de calcul, c'est-à-dire des serveurs virtuels dans AWS."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quelle option est la plus adaptée pour exécuter du code en réponse à des événements sans gérer de serveurs ?", "options": ["AWS Lambda", "Amazon EC2 dédié", "AWS Direct Connect", "Amazon EBS"], "answers": [0], "explanation": "AWS Lambda permet d'exécuter du code sans gérer de serveurs, avec une facturation liée à l'exécution."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service est conçu pour stocker des objets avec une haute durabilité, comme des fichiers, images ou sauvegardes ?", "options": ["Amazon S3", "Amazon RDS", "Amazon EKS", "AWS KMS"], "answers": [0], "explanation": "Amazon S3 est le service de stockage d'objets d'AWS."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Une entreprise veut archiver des données rarement consultées pendant plusieurs années au coût le plus bas. Quelle classe de stockage S3 est souvent la plus adaptée ?", "options": ["S3 Glacier Deep Archive", "S3 Standard", "Amazon EFS", "Amazon ElastiCache"], "answers": [0], "explanation": "S3 Glacier Deep Archive est destiné aux archives longues avec accès très rare et coût de stockage bas."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles associations service - usage sont correctes ? Choisissez 2 réponses.", "options": ["Amazon EBS - stockage bloc attaché à une instance", "Amazon EFS - système de fichiers partagé", "Amazon S3 - base de données relationnelle", "AWS KMS - équilibrage de charge", "Amazon Route 53 - orchestration de conteneurs"], "answers": [0, 1], "explanation": "EBS fournit du stockage bloc pour EC2. EFS fournit un système de fichiers partagé et managé."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service managé permet d'exécuter des bases de données relationnelles comme MySQL, PostgreSQL ou SQL Server ?", "options": ["Amazon RDS", "Amazon DynamoDB", "Amazon CloudFront", "AWS Shield"], "answers": [0], "explanation": "Amazon RDS simplifie l'administration de bases relationnelles managées."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service est une base de données NoSQL clé-valeur et document entièrement managée ?", "options": ["Amazon DynamoDB", "Amazon Aurora", "AWS CloudTrail", "Amazon EFS"], "answers": [0], "explanation": "Amazon DynamoDB est une base NoSQL managée pour des modèles clé-valeur et documents."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service permet de créer un réseau virtuel isolé dans AWS avec des sous-réseaux, tables de routage et groupes de sécurité ?", "options": ["Amazon VPC", "Amazon SNS", "AWS Budgets", "Amazon Textract"], "answers": [0], "explanation": "Amazon VPC permet de définir un réseau virtuel isolé pour les ressources AWS."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service fournit des fonctions DNS et d'enregistrement de noms de domaine dans AWS ?", "options": ["Amazon Route 53", "Amazon Redshift", "AWS Lambda", "AWS Artifact"], "answers": [0], "explanation": "Amazon Route 53 est le service DNS managé d'AWS et peut aussi gérer l'enregistrement de domaines."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service de réseau de diffusion de contenu met en cache du contenu dans des emplacements proches des utilisateurs ?", "options": ["Amazon CloudFront", "AWS Config", "Amazon RDS", "AWS Secrets Manager"], "answers": [0], "explanation": "Amazon CloudFront est le CDN d'AWS qui utilise des emplacements périphériques pour réduire la latence."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service répartit automatiquement le trafic entrant entre plusieurs cibles, comme des instances EC2 ?", "options": ["Elastic Load Balancing", "Amazon Macie", "AWS Glue", "AWS Pricing Calculator"], "answers": [0], "explanation": "Elastic Load Balancing distribue le trafic entre plusieurs cibles afin d'améliorer disponibilité et scalabilité."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service ajuste automatiquement le nombre d'instances EC2 selon la demande ou selon des règles définies ?", "options": ["AWS Auto Scaling", "AWS Artifact", "Amazon Kendra", "AWS IAM Identity Center"], "answers": [0], "explanation": "AWS Auto Scaling aide à adapter la capacité selon la demande et les politiques définies."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles associations service - messagerie sont correctes ? Choisissez 2 réponses.", "options": ["Amazon SQS - file d'attente pour découpler des composants", "Amazon SNS - publication de messages vers plusieurs abonnés", "Amazon EBS - traduction automatique", "Amazon Route 53 - analyse d'images", "AWS WAF - base de données NoSQL"], "answers": [0, 1], "explanation": "SQS sert aux files de messages. SNS sert au modèle pub/sub et aux notifications vers plusieurs abonnés."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles options sont liées à l'exécution de conteneurs sur AWS ? Choisissez 2 réponses.", "options": ["Amazon ECS", "Amazon EKS", "Amazon Route 53", "AWS Budgets", "Amazon Macie"], "answers": [0, 1], "explanation": "Amazon ECS et Amazon EKS sont des services d'orchestration de conteneurs."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Une entreprise veut une connexion réseau privée dédiée entre son datacenter et AWS. Quel service choisir ?", "options": ["AWS Direct Connect", "Amazon CloudFront", "Amazon SQS", "AWS Config"], "answers": [0], "explanation": "AWS Direct Connect fournit une connexion réseau dédiée entre l'environnement du client et AWS."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service collecte des métriques, journaux et alarmes pour surveiller les ressources et applications AWS ?", "options": ["Amazon CloudWatch", "AWS Artifact", "Amazon S3 Glacier", "AWS Marketplace"], "answers": [0], "explanation": "Amazon CloudWatch fournit métriques, logs, alarmes et tableaux de bord pour la surveillance."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service permet de définir et provisionner l'infrastructure AWS sous forme de modèles de code ?", "options": ["AWS CloudFormation", "Amazon Cognito", "AWS Shield", "AWS Pricing Calculator"], "answers": [0], "explanation": "AWS CloudFormation permet de gérer l'infrastructure as code avec des modèles."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Une équipe veut créer, entraîner et déployer des modèles de machine learning sur AWS. Quel service est le plus adapté ?", "options": ["Amazon SageMaker AI", "Amazon Route 53", "AWS CloudTrail", "Amazon SQS"], "answers": [0], "explanation": "Amazon SageMaker AI est le service AWS prévu pour créer, entraîner et déployer des modèles de machine learning."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles associations IA/ML sont correctes ? Choisissez 2 réponses.", "options": ["Amazon Lex - créer des chatbots conversationnels", "Amazon Kendra - recherche intelligente dans des contenus", "Amazon EBS - synthèse vocale", "AWS Glue - détection de visages", "Amazon Route 53 - analyse de sentiments"], "answers": [0, 1], "explanation": "Amazon Lex sert aux interfaces conversationnelles. Amazon Kendra sert à la recherche intelligente en entreprise."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles associations IA/ML sont correctes ? Choisissez 2 réponses.", "options": ["Amazon Rekognition - analyse d'images et de vidéos", "Amazon Textract - extraction de texte et de données depuis des documents", "Amazon VPC - traduction automatique", "AWS Budgets - reconnaissance vocale", "Amazon RDS - service de chatbot"], "answers": [0, 1], "explanation": "Rekognition analyse images/vidéos. Textract extrait du texte et des données de documents."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Une application doit convertir automatiquement des fichiers audio en texte. Quel service AWS répond à ce besoin ?", "options": ["Amazon Transcribe", "Amazon Translate", "Amazon Polly", "Amazon Comprehend"], "answers": [0], "explanation": "Amazon Transcribe convertit la parole en texte. Translate traduit du texte, Polly transforme du texte en voix et Comprehend analyse le langage naturel."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles associations analytics sont correctes ? Choisissez 3 réponses.", "options": ["Amazon Athena - requêtes SQL sur des données dans Amazon S3", "Amazon Kinesis - collecte et traitement de flux de données", "Amazon QuickSight - tableaux de bord et visualisations BI", "Amazon DynamoDB - pare-feu web", "AWS Shield - ETL et catalogue de données"], "answers": [0, 1, 2], "explanation": "Athena sert aux requêtes SQL sur S3, Kinesis aux flux de données et QuickSight aux tableaux de bord de business intelligence."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel outil permet de définir des seuils de dépenses et d'envoyer des alertes lorsque les coûts prévus ou réels les dépassent ?", "options": ["AWS Budgets", "AWS CloudTrail", "Amazon Inspector", "AWS Artifact"], "answers": [0], "explanation": "AWS Budgets permet de définir des budgets de coût, d'utilisation ou d'engagement et d'envoyer des notifications."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel outil permet d'analyser visuellement les dépenses AWS historiques et les tendances de coûts ?", "options": ["AWS Cost Explorer", "Amazon Route 53", "AWS CloudFormation", "Amazon Cognito"], "answers": [0], "explanation": "AWS Cost Explorer aide a visualiser, filtrer et comprendre les coûts et l'utilisation AWS."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel outil permet d'estimer le coût d'une architecture AWS avant de la déployer ?", "options": ["AWS Pricing Calculator", "AWS Config", "Amazon GuardDuty", "Amazon SNS"], "answers": [0], "explanation": "AWS Pricing Calculator permet de créer des estimations de coûts pour des services AWS."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel rapport fournit des détails complets et granulaires sur l'utilisation et les coûts AWS ?", "options": ["AWS Cost and Usage Report", "AWS Artifact uniquement", "Amazon CloudWatch Events", "AWS IAM Access Analyzer"], "answers": [0], "explanation": "AWS Cost and Usage Report, CUR, fournit des données détaillées sur les coûts et l'utilisation."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "multiple", "question": "Quelles options peuvent réduire les coûts pour des charges de travail prévisibles ou flexibles ? Choisissez 2 réponses.", "options": ["Savings Plans", "Instances Spot pour des workloads tolérants aux interruptions", "Toujours utiliser On-Demand pour tout", "Désactiver AWS Budgets", "Créer plus de comptes root"], "answers": [0, 1], "explanation": "Savings Plans aide pour une utilisation prévisible; Spot peut réduire les coûts pour des charges flexibles et interruptibles."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel avantage de la facturation consolidée dans AWS Organizations est correct ?", "options": ["Regrouper la facturation de plusieurs comptes sous un compte de gestion", "Supprimer automatiquement tous les coûts EC2", "Convertir tous les comptes en compte root unique", "Empêcher la création de budgets"], "answers": [0], "explanation": "La facturation consolidée permet de gérer la facturation de plusieurs comptes a partir d'un compte de gestion."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel plan de support AWS inclut généralement l'accès a un Technical Account Manager, TAM ?", "options": ["Enterprise Support", "Basic Support", "Developer Support", "Support gratuit uniquement via forums"], "answers": [0], "explanation": "Enterprise Support inclut l'accès a un Technical Account Manager pour un accompagnement proactif."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel service fournit des recommandations de bonnes pratiques, notamment sur les coûts, la sécurité, la performance et la tolérance aux pannes ?", "options": ["AWS Trusted Advisor", "AWS CloudTrail", "Amazon SQS", "Amazon Polly"], "answers": [0], "explanation": "AWS Trusted Advisor analyse l'environnement et fournit des recommandations de bonnes pratiques dans plusieurs catégories."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel avantage du cloud permet à une équipe de lancer un environnement de test en quelques minutes puis de le supprimer juste après usage ?", "options": ["Élasticité", "Agilité", "Archivage", "Conformité"], "answers": [1], "explanation": "L'agilité permet de créer rapidement des environnements, tester, puis arrêter les ressources pour avancer plus vite."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel pilier du AWS Well-Architected Framework traite surtout de la protection des informations, des systèmes et des actifs ?", "options": ["Sécurité", "Fiabilité", "Durabilité", "Performance"], "answers": [0], "explanation": "Le pilier Sécurité couvre la protection des données, la gestion des accès, la détection et la réponse aux incidents."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "multiple", "question": "Quels éléments illustrent les économies d'échelle du cloud AWS ? Choisissez 2 réponses.", "options": ["AWS mutualise l'infrastructure pour un grand nombre de clients", "Chaque client doit acheter ses propres datacenters", "AWS peut réduire certains coûts unitaires grâce au volume", "Le cloud interdit toute optimisation financière", "Le client doit réserver de la capacité physique dans tous les cas"], "answers": [0, 2], "explanation": "Les économies d'échelle proviennent de l'exploitation d'une infrastructure mondiale partagée et de volumes très importants."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quelle caractéristique du cloud aide surtout à distribuer une application à l'international avec une faible latence ?", "options": ["Présence mondiale de l'infrastructure AWS", "Partage du compte root", "Utilisation exclusive de serveurs bare metal", "Désactivation du cache"], "answers": [0], "explanation": "L'infrastructure mondiale d'AWS permet de rapprocher les workloads et le contenu des utilisateurs partout dans le monde."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Quel concept décrit la capacité à concevoir un système qui continue de fonctionner même lorsqu'un composant tombe en panne ?", "options": ["Tolérance aux pannes", "Budgétisation", "Déduplication", "Versioning"], "answers": [0], "explanation": "La tolérance aux pannes vise à maintenir le service malgré la défaillance d'un ou plusieurs composants."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "single", "question": "Pourquoi une entreprise choisit-elle souvent le cloud pour accélérer l'innovation ?", "options": ["Parce qu'il impose un cycle d'achat plus long", "Parce qu'il permet de tester rapidement de nouvelles idées", "Parce qu'il supprime tous les besoins de gouvernance", "Parce qu'il remplace automatiquement toutes les applications anciennes"], "answers": [1], "explanation": "Le cloud accélère l'innovation grâce au provisionnement rapide et à l'accès à de nombreux services managés."}, {"domain": "Domaine 1 - Concepts du cloud", "type": "multiple", "question": "Quelles pratiques soutiennent le pilier Excellence opérationnelle ? Choisissez 2 réponses.", "options": ["Automatiser les tâches répétitives", "Documenter et améliorer les procédures d'exploitation", "Toujours opérer manuellement pour tout contrôler", "Supprimer les journaux pour réduire les coûts", "Utiliser le compte root au quotidien"], "answers": [0, 1], "explanation": "L'excellence opérationnelle repose notamment sur l'automatisation, l'amélioration continue et des procédures bien documentées."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service AWS aide à détecter quelles ressources sont partagées avec des entités externes à votre compte ou organisation ?", "options": ["IAM Access Analyzer", "Amazon Inspector", "AWS Budgets", "Amazon Macie"], "answers": [0], "explanation": "IAM Access Analyzer permet d'identifier les accès externes ou inattendus à certaines ressources."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service permet de découvrir et protéger des données sensibles stockées dans Amazon S3, comme des numéros de carte ou des données personnelles ?", "options": ["Amazon Macie", "AWS Artifact", "Amazon GuardDuty", "AWS Organizations"], "answers": [0], "explanation": "Amazon Macie utilise le machine learning pour découvrir et classifier les données sensibles dans S3."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "multiple", "question": "Quelles bonnes pratiques concernent le compte root AWS ? Choisissez 2 réponses.", "options": ["Activer MFA sur le compte root", "Utiliser le compte root uniquement pour les tâches qui l'exigent", "Créer des accès root pour chaque administrateur", "Partager les identifiants root avec l'équipe", "Utiliser le compte root pour lancer les workloads quotidiens"], "answers": [0, 1], "explanation": "Le compte root doit être fortement protégé et réservé aux très rares opérations administratives qui l'exigent."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service AWS évalue en continu les configurations des ressources par rapport à des règles souhaitées ?", "options": ["AWS Config", "Amazon S3", "Amazon Inspector", "AWS Shield"], "answers": [0], "explanation": "AWS Config enregistre l'état des ressources et permet de vérifier leur conformité à des règles."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Quel service est particulièrement adapté pour analyser les vulnérabilités logicielles de certaines charges de travail comme les instances EC2 et les images de conteneurs ?", "options": ["Amazon Inspector", "AWS Artifact", "Amazon CloudFront", "AWS Cost Explorer"], "answers": [0], "explanation": "Amazon Inspector aide à identifier des vulnérabilités et des expositions dans certaines charges de travail AWS."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "multiple", "question": "Quelles affirmations décrivent bien le modèle de responsabilité partagée ? Choisissez 2 réponses.", "options": ["AWS est responsable de la sécurité de l'infrastructure du cloud", "Le client est responsable de la configuration de ses identités et de ses données", "AWS gère automatiquement les utilisateurs IAM du client", "Le client n'a aucune responsabilité sur ses systèmes d'exploitation EC2", "Le partage des responsabilités n'existe que pour Amazon S3"], "answers": [0, 1], "explanation": "AWS sécurise l'infrastructure du cloud, tandis que le client sécurise ce qu'il déploie et configure dans le cloud."}, {"domain": "Domaine 2 - Sécurité et conformité", "type": "single", "question": "Où un client peut-il consulter certains rapports de conformité et accords AWS en libre-service ?", "options": ["AWS Artifact", "AWS Lambda", "Amazon SNS", "AWS Systems Manager"], "answers": [0], "explanation": "AWS Artifact permet d'accéder à des rapports de conformité et à certains documents de gouvernance."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service de calcul serverless exécute du code en réponse à des événements sans gérer de serveurs ?", "options": ["AWS Lambda", "Amazon EC2", "Amazon Lightsail", "AWS Outposts"], "answers": [0], "explanation": "AWS Lambda exécute du code à la demande sans administration de serveurs."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quelle option de stockage AWS est un système de fichiers partagé pour plusieurs instances Linux ?", "options": ["Amazon EFS", "Amazon S3", "Amazon DynamoDB", "AWS Backup"], "answers": [0], "explanation": "Amazon EFS fournit un système de fichiers élastique partagé, souvent monté par plusieurs instances."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles associations sont correctes ? Choisissez 2 réponses.", "options": ["Amazon SNS - publication/abonnement de messages", "Amazon SQS - files d'attente de messages", "Amazon RDS - CDN mondial", "Amazon CloudFront - base de données relationnelle", "AWS Glue - service DNS"], "answers": [0, 1], "explanation": "SNS sert au pub/sub et SQS aux files de messages. CloudFront est un CDN et Route 53 est le service DNS."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service AWS fournit une base de données NoSQL clé-valeur et document à faible latence ?", "options": ["Amazon DynamoDB", "Amazon Aurora", "Amazon Redshift", "Amazon Neptune"], "answers": [0], "explanation": "Amazon DynamoDB est une base NoSQL gérée offrant de très faibles latences à grande échelle."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service AWS est le plus adapté pour une base de données relationnelle gérée compatible MySQL et PostgreSQL avec de hautes performances ?", "options": ["Amazon Aurora", "Amazon S3 Glacier", "Amazon ElastiCache", "AWS Fargate"], "answers": [0], "explanation": "Amazon Aurora est un moteur de base de données relationnelle managé compatible MySQL et PostgreSQL."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles associations IA/ML sont correctes ? Choisissez 2 réponses.", "options": ["Amazon Comprehend - analyse de texte et extraction d'insights", "Amazon Polly - conversion de texte en parole", "Amazon VPC - reconnaissance d'images", "Amazon ECS - traduction automatique", "Amazon EFS - chatbot conversationnel"], "answers": [0, 1], "explanation": "Comprehend analyse le langage naturel et Polly convertit du texte en parole."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Quel service AWS convertit du texte écrit en voix naturelle ?", "options": ["Amazon Polly", "Amazon Translate", "Amazon Lex", "Amazon Textract"], "answers": [0], "explanation": "Amazon Polly transforme du texte en voix synthétique de qualité naturelle."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "single", "question": "Une entreprise veut traduire automatiquement des descriptions produits d'une langue à une autre. Quel service est le plus adapté ?", "options": ["Amazon Translate", "Amazon Transcribe", "Amazon Athena", "Amazon Inspector"], "answers": [0], "explanation": "Amazon Translate sert à la traduction automatique de texte."}, {"domain": "Domaine 3 - Technologies et services cloud", "type": "multiple", "question": "Quelles affirmations sur l'analytique AWS sont correctes ? Choisissez 2 réponses.", "options": ["AWS Glue peut aider à l'ETL et au catalogue de données", "Amazon Redshift est un entrepôt de données géré", "Amazon Route 53 sert à visualiser des tableaux de bord BI", "AWS WAF permet d'interroger S3 en SQL", "Amazon Athena est un service de chatbot"], "answers": [0, 1], "explanation": "AWS Glue aide à préparer et cataloguer les données, et Amazon Redshift est un data warehouse géré."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel tableau de bord AWS aide à comprendre la posture de coûts d'un compte en regroupant plusieurs recommandations d'optimisation ?", "options": ["AWS Cost Optimization Hub", "Amazon Polly", "AWS WAF", "AWS Directory Service"], "answers": [0], "explanation": "AWS Cost Optimization Hub centralise certaines opportunités d'optimisation des coûts dans AWS."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel modèle de tarification EC2 est généralement le plus flexible quand vous avez besoin de capacité sans engagement à long terme ?", "options": ["On-Demand", "Savings Plans toujours", "Instances dédiées uniquement", "Spot toujours"], "answers": [0], "explanation": "Le modèle On-Demand offre la plus grande flexibilité sans engagement initial."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "multiple", "question": "Quels outils aident directement à suivre ou maîtriser les coûts AWS ? Choisissez 2 réponses.", "options": ["AWS Budgets", "AWS Cost Explorer", "Amazon GuardDuty", "AWS Shield", "Amazon Lex"], "answers": [0, 1], "explanation": "AWS Budgets et Cost Explorer sont directement conçus pour surveiller et analyser les coûts."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Quel plan de support AWS offre un support de base gratuit pour tous les clients ?", "options": ["Basic Support", "Developer Support", "Business Support", "Enterprise Support"], "answers": [0], "explanation": "Basic Support est inclus sans coût supplémentaire pour tous les comptes AWS."}, {"domain": "Domaine 4 - Facturation, tarification et support", "type": "single", "question": "Pour un workload tolérant aux interruptions et sensible au prix, quel choix est souvent le plus économique ?", "options": ["Instances Spot", "Instances On-Demand", "Instances dédiées", "Toujours une licence perpétuelle"], "answers": [0], "explanation": "Les instances Spot peuvent offrir des réductions importantes pour des charges de travail flexibles et interruptibles."}];
+    const DOMAIN_TARGETS = {
+      "Domaine 1 - Concepts du cloud": 16,
+      "Domaine 2 - Sécurité et conformité": 19,
+      "Domaine 3 - Technologies et services cloud": 22,
+      "Domaine 4 - Facturation, tarification et support": 8,
+    };
+
+    let questions = [];
+    let current = 0;
+    let finished = false;
+    let selections = [];
+    let remainingSeconds = 90 * 60;
+    let drawCount = 0;
+
+    const $ = sel => document.querySelector(sel);
+    const questionCard = $('#questionCard');
+    const questionNav = $('#questionNav');
+
+    function letter(i) { return String.fromCharCode(65 + i); }
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+    function sameSet(a, b) {
+      if (a.size !== b.length) return false;
+      return b.every(x => a.has(x));
+    }
+    function answeredCount() { return selections.filter(s => s.size > 0).length; }
+    function isCorrect(i) { return sameSet(selections[i], questions[i].answers); }
+
+    function buildExam() {
+      const grouped = {};
+      questionPool.forEach(q => {
+        if (!grouped[q.domain]) grouped[q.domain] = [];
+        grouped[q.domain].push({ ...q });
+      });
+      const picked = [];
+      Object.entries(DOMAIN_TARGETS).forEach(([domain, count]) => {
+        const domainQuestions = shuffleArray([...(grouped[domain] || [])]);
+        picked.push(...domainQuestions.slice(0, count));
+      });
+      return shuffleArray(picked);
+    }
+
+    function renderNav() {
+      questionNav.innerHTML = questions.map((q, i) => {
+        const cls = ['qbtn'];
+        if (i === current) cls.push('active');
+        if (selections[i].size) cls.push('answered');
+        if (finished) cls.push(isCorrect(i) ? 'correct' : 'incorrect');
+        return `<button class="${cls.join(' ')}" onclick="goTo(${i})">${i + 1}</button>`;
+      }).join('');
+      $('#answeredCount').textContent = answeredCount();
+      $('#totalCount').textContent = questions.length;
+      $('#progressBar').style.width = `${answeredCount() / questions.length * 100}%`;
+    }
+
+    function renderQuestion() {
+      const q = questions[current];
+      const multiple = q.type === 'multiple';
+      const typeLabel = multiple ? `QRM - ${q.answers.length} réponses` : 'QCM - 1 réponse';
+      questionCard.innerHTML = `
+        <div class="question-head">
+          <div><strong>Question ${current + 1} / ${questions.length}</strong><br><span class="small">${q.domain}</span></div>
+          <span class="tag">${typeLabel}</span>
+        </div>
+        <div class="question-body">
+          <div class="question-text">${escapeHtml(q.question)}</div>
+          <div class="options">
+            ${q.options.map((opt, idx) => renderOption(q, idx, opt)).join('')}
+          </div>
+          <div class="explanation ${finished ? 'show' : ''}"><strong>Corrigé :</strong> ${q.answers.map(letter).join(', ')}<br>${escapeHtml(q.explanation)}</div>
+        </div>
+      `;
+      $('#prevBtn').disabled = current === 0;
+      $('#nextBtn').disabled = current === questions.length - 1;
+      renderNav();
+    }
+
+    function renderOption(q, idx, opt) {
+      const inputType = q.type === 'multiple' ? 'checkbox' : 'radio';
+      const checked = selections[current].has(idx) ? 'checked' : '';
+      let cls = 'option';
+      if (finished) {
+        const selected = selections[current].has(idx);
+        const correct = q.answers.includes(idx);
+        if (selected && correct) cls += ' correct';
+        if (selected && !correct) cls += ' incorrect';
+        if (!selected && correct) cls += ' missed';
+      }
+      return `
+        <label class="${cls}">
+          <input type="${inputType}" name="q${current}" value="${idx}" ${checked} ${finished ? 'disabled' : ''} onchange="toggleAnswer(${idx}, this.checked)" />
+          <span><strong>${letter(idx)}.</strong> ${escapeHtml(opt)}</span>
+        </label>`;
+    }
+
+    function toggleAnswer(idx, checked) {
+      const q = questions[current];
+      if (q.type === 'single') {
+        selections[current].clear();
+        if (checked) selections[current].add(idx);
+      } else {
+        if (checked) selections[current].add(idx); else selections[current].delete(idx);
+      }
+      renderQuestion();
+    }
+
+    function goTo(i) { current = i; renderQuestion(); questionCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    $('#prevBtn').onclick = () => { if (current > 0) goTo(current - 1); };
+    $('#nextBtn').onclick = () => { if (current < questions.length - 1) goTo(current + 1); };
+    $('#finishBtn').onclick = finish;
+    $('#resetBtn').onclick = () => initializeExam(true);
+
+    function finish() {
+      finished = true;
+      const score = questions.reduce((sum, q, i) => sum + (isCorrect(i) ? 1 : 0), 0);
+      const pct = Math.round(score / questions.length * 100);
+      const byDomain = {};
+      questions.forEach((q, i) => {
+        byDomain[q.domain] ||= { total: 0, ok: 0 };
+        byDomain[q.domain].total++;
+        if (isCorrect(i)) byDomain[q.domain].ok++;
+      });
+      const advice = pct >= 75 ? 'Très bon niveau pour continuer avec des questions officielles et des labs.' : pct >= 65 ? 'Niveau encourageant : révise les domaines faibles puis refais un test.' : 'Reprends les fondamentaux avant de refaire une simulation complète.';
+      $('#resultBox').innerHTML = `
+        <h2>Résultat</h2>
+        <div class="score">${score} / ${questions.length} <span class="small">(${pct}%)</span></div>
+        <p>${advice}</p>
+        <div class="domain-results">
+          ${Object.entries(byDomain).map(([d, r]) => `<div class="domain-chip"><strong>${d}</strong> : ${r.ok} / ${r.total}</div>`).join('')}
+        </div>
+        <p class="small">Note : l'examen officiel utilise un score échelonné. Ce pourcentage sert uniquement à l'entraînement.</p>
+      `;
+      $('#resultBox').classList.add('show');
+      renderQuestion();
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+      const s = (remainingSeconds % 60).toString().padStart(2, '0');
+      $('#timer').textContent = `${m}:${s}`;
+    }
+
+    function tick() {
+      if (!finished && remainingSeconds > 0) {
+        remainingSeconds--;
+        updateTimerDisplay();
+      }
+      if (remainingSeconds === 0 && !finished) finish();
+    }
+
+    function initializeExam(askConfirmation = false) {
+      if (askConfirmation && !confirm('Réinitialiser le test et lancer un nouveau tirage de questions ?')) return;
+      questions = buildExam();
+      selections = questions.map(() => new Set());
+      current = 0;
+      finished = false;
+      remainingSeconds = 90 * 60;
+      drawCount += 1;
+      $('#resultBox').classList.remove('show');
+      const drawInfo = $('#drawInfo');
+      if (drawInfo) drawInfo.textContent = `Tirage aléatoire #${drawCount} · banque de ${questionPool.length} questions`;
+      updateTimerDisplay();
+      renderQuestion();
+    }
+
+    setInterval(tick, 1000);
+    initializeExam(false);
+
+  </script>
+</body>
+</html>
