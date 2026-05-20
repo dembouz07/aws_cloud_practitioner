@@ -35,6 +35,12 @@
       color: var(--ink);
       min-height: 100vh;
     }
+    body.exam-active {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
     .app-header {
       padding: 12px 14px 0;
       position: static;
@@ -86,13 +92,13 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.75);
       border-radius: 22px;
       z-index: 0;
       transition: background 0.3s ease;
     }
     .brand-card:hover::before {
-      background: rgba(255, 255, 255, 0.88);
+      background: rgba(255, 255, 255, 0.65);
     }
     .brand-card > * {
       position: relative;
@@ -685,7 +691,10 @@
           <ul style="margin: 8px 0; padding-left: 20px; line-height: 1.8;">
             <li>Le chronomètre démarre dès que vous cliquez sur "Commencer"</li>
             <li>Ne changez pas d'onglet pendant l'examen</li>
-            <li>Les captures d'écran sont détectées</li>
+            <li>Les captures d'écran sont détectées et bloquées</li>
+            <li>La copie de texte (Ctrl+C) est interdite</li>
+            <li>La sélection de texte est désactivée</li>
+            <li>Le clic droit est bloqué</li>
             <li>Toute infraction déclenchera une alarme sonore</li>
             <li>Après 3 infractions, l'examen sera automatiquement terminé</li>
           </ul>
@@ -1021,9 +1030,30 @@
       }
     });
 
-    // Bloquer captures d'écran
+    // Bloquer captures d'écran et copie
     document.addEventListener('keydown', function(e) {
       if (!examStarted) return;
+      
+      // Bloquer Ctrl+C (copie)
+      if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault();
+        recordInfraction('Tentative de copie détectée');
+        return false;
+      }
+      
+      // Bloquer Ctrl+X (couper)
+      if (e.ctrlKey && (e.key === 'x' || e.key === 'X')) {
+        e.preventDefault();
+        recordInfraction('Tentative de copie détectée');
+        return false;
+      }
+      
+      // Bloquer Ctrl+A (tout sélectionner)
+      if (e.ctrlKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        recordInfraction('Tentative de sélection détectée');
+        return false;
+      }
       
       if (e.key === 'PrintScreen' || e.keyCode === 44) {
         e.preventDefault();
@@ -1065,6 +1095,23 @@
       }
     });
 
+    // Bloquer la copie via événement copy
+    document.addEventListener('copy', function(e) {
+      if (examStarted) {
+        e.preventDefault();
+        recordInfraction('Tentative de copie détectée');
+        return false;
+      }
+    });
+
+    // Bloquer la sélection de texte
+    document.addEventListener('selectstart', function(e) {
+      if (examStarted) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
     // Détecter redimensionnement
     let lastWidth = window.innerWidth;
     let lastHeight = window.innerHeight;
@@ -1099,6 +1146,9 @@
         examStarted = true;
         infractions = parseInt(savedInfractions) || 0;
         
+        // Ajouter la classe pour bloquer la sélection
+        document.body.classList.add('exam-active');
+        
         const startScreen = document.getElementById('startScreen');
         const questionCard = document.getElementById('questionCard');
         if (startScreen) startScreen.style.display = 'none';
@@ -1127,6 +1177,9 @@
         startBtn.addEventListener('click', function() {
           examStarted = true;
           infractions = 0;
+          
+          // Ajouter la classe pour bloquer la sélection
+          document.body.classList.add('exam-active');
           
           localStorage.setItem('exam_started', 'true');
           localStorage.setItem('start_time', Date.now());
