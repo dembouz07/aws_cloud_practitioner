@@ -66,6 +66,11 @@
     }
     .brand-card {
       background: var(--card);
+      background-image: url('image.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
       border: 1px solid rgba(213, 219, 227, .92);
       border-radius: 22px;
       padding: 16px 20px;
@@ -75,6 +80,33 @@
       gap: 18px;
       box-shadow: var(--shadow);
       min-height: 116px;
+      animation: backgroundFadeIn 1.5s ease-out;
+    }
+    .brand-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 22px;
+      z-index: 0;
+      transition: background 0.3s ease;
+    }
+    .brand-card:hover::before {
+      background: rgba(255, 255, 255, 0.88);
+    }
+    .brand-card > * {
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes backgroundFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     .promo-photo {
       width: 100%;
@@ -618,9 +650,6 @@
         <div class="header-actions" style="display: none;">
           <span class="exam-pill"><span class="dot"></span>Mode examen · 90 min</span>
         </div>
-        <div class="promo-photo-container">
-          <img src="image.png" alt="Photo de groupe Promo 5 Orange Digital Center" class="promo-photo" />
-        </div>
       </div>
     </div>
   </header>
@@ -906,6 +935,220 @@
   </script>
   
   <!-- Système de surveillance d'examen -->
-  <script src="exam-proctoring.js"></script>
+  <script>
+    // ============================================
+    // SYSTÈME DE SURVEILLANCE D'EXAMEN - INTÉGRÉ
+    // ============================================
+    let examStarted = false;
+    let infractions = 0;
+    const MAX_INFRACTIONS = 3;
+
+    // Créer et jouer une alarme sonore
+    function playAlarm() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.3;
+        
+        oscillator.start();
+        setTimeout(() => oscillator.frequency.value = 600, 200);
+        setTimeout(() => oscillator.frequency.value = 800, 400);
+        setTimeout(() => oscillator.frequency.value = 600, 600);
+        setTimeout(() => {
+          oscillator.stop();
+          audioContext.close();
+        }, 800);
+      } catch (e) {
+        console.error('Erreur alarme:', e);
+      }
+    }
+
+    // Enregistrer une infraction
+    function recordInfraction(reason) {
+      if (!examStarted) return;
+      
+      infractions++;
+      localStorage.setItem('infractions', infractions);
+      
+      const infractionCountEl = document.getElementById('infractionCount');
+      const warningBanner = document.getElementById('warningBanner');
+      const infractionText = document.getElementById('infractionText');
+      
+      if (infractionCountEl) infractionCountEl.textContent = infractions;
+      const infractionCounter = document.getElementById('infractionCounter');
+      if (infractionCounter) infractionCounter.style.display = 'block';
+      
+      if (infractionText) infractionText.textContent = `${reason} (${infractions}/${MAX_INFRACTIONS})`;
+      if (warningBanner) warningBanner.classList.add('show');
+      
+      playAlarm();
+      
+      setTimeout(() => {
+        if (warningBanner) warningBanner.classList.remove('show');
+      }, 5000);
+      
+      if (infractions >= MAX_INFRACTIONS) {
+        setTimeout(() => {
+          alert('EXAMEN TERMINÉ\n\nVous avez commis 3 infractions. L\'examen est automatiquement terminé.\n\nRaison : Comportement suspect détecté.');
+          if (typeof finish === 'function') {
+            finish();
+          }
+          localStorage.clear();
+          examStarted = false;
+          infractions = 0;
+        }, 2000);
+      }
+    }
+
+    // Détecter changement d'onglet
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden && examStarted) {
+        recordInfraction('Changement d\'onglet détecté');
+      }
+    });
+
+    // Détecter perte de focus
+    window.addEventListener('blur', function() {
+      if (examStarted) {
+        recordInfraction('Fenêtre minimisée');
+      }
+    });
+
+    // Bloquer captures d'écran
+    document.addEventListener('keydown', function(e) {
+      if (!examStarted) return;
+      
+      if (e.key === 'PrintScreen' || e.keyCode === 44) {
+        e.preventDefault();
+        recordInfraction('Capture d\'écran détectée');
+        return false;
+      }
+      
+      if (e.ctrlKey && e.shiftKey && (e.key === 'S' || e.key === 's')) {
+        e.preventDefault();
+        recordInfraction('Capture d\'écran détectée');
+        return false;
+      }
+      
+      if (e.metaKey && e.shiftKey && e.key === 's') {
+        e.preventDefault();
+        recordInfraction('Capture d\'écran détectée');
+        return false;
+      }
+      
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        recordInfraction('Outils développeur détectés');
+        return false;
+      }
+      
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+        e.preventDefault();
+        recordInfraction('Outils développeur détectés');
+        return false;
+      }
+    });
+
+    // Bloquer clic droit
+    document.addEventListener('contextmenu', function(e) {
+      if (examStarted) {
+        e.preventDefault();
+        recordInfraction('Clic droit détecté');
+        return false;
+      }
+    });
+
+    // Détecter redimensionnement
+    let lastWidth = window.innerWidth;
+    let lastHeight = window.innerHeight;
+    window.addEventListener('resize', function() {
+      if (examStarted) {
+        const widthChange = Math.abs(window.innerWidth - lastWidth);
+        const heightChange = Math.abs(window.innerHeight - lastHeight);
+        
+        if (widthChange > 100 || heightChange > 100) {
+          recordInfraction('Redimensionnement suspect');
+        }
+        
+        lastWidth = window.innerWidth;
+        lastHeight = window.innerHeight;
+      }
+    });
+
+    // Sauvegarder l'état toutes les secondes
+    setInterval(() => {
+      if (examStarted) {
+        localStorage.setItem('exam_started', 'true');
+        localStorage.setItem('infractions', infractions);
+      }
+    }, 1000);
+
+    // Restaurer l'état au chargement
+    window.addEventListener('DOMContentLoaded', function() {
+      const savedExamStarted = localStorage.getItem('exam_started');
+      const savedInfractions = localStorage.getItem('infractions');
+      
+      if (savedExamStarted === 'true') {
+        examStarted = true;
+        infractions = parseInt(savedInfractions) || 0;
+        
+        const startScreen = document.getElementById('startScreen');
+        const questionCard = document.getElementById('questionCard');
+        if (startScreen) startScreen.style.display = 'none';
+        if (questionCard) questionCard.style.display = 'block';
+        
+        const infractionCounter = document.getElementById('infractionCounter');
+        const infractionCount = document.getElementById('infractionCount');
+        if (infractionCounter) infractionCounter.style.display = 'block';
+        if (infractionCount) infractionCount.textContent = infractions;
+        
+        if (infractions < MAX_INFRACTIONS) {
+          recordInfraction('Actualisation de la page');
+        }
+        
+        if (typeof startTimer === 'function') {
+          startTimer();
+        }
+        if (typeof initializeExam === 'function') {
+          initializeExam(false);
+        }
+      }
+      
+      // Bouton de démarrage
+      const startBtn = document.getElementById('startExamBtn');
+      if (startBtn) {
+        startBtn.addEventListener('click', function() {
+          examStarted = true;
+          infractions = 0;
+          
+          localStorage.setItem('exam_started', 'true');
+          localStorage.setItem('start_time', Date.now());
+          localStorage.setItem('infractions', '0');
+          
+          document.getElementById('startScreen').style.display = 'none';
+          document.getElementById('questionCard').style.display = 'block';
+          document.getElementById('infractionCounter').style.display = 'block';
+          
+          if (typeof startTimer === 'function') {
+            startTimer();
+          }
+          if (typeof initializeExam === 'function') {
+            initializeExam(false);
+          }
+          
+          console.log('Examen démarré - Surveillance activée');
+        });
+      }
+    });
+
+    console.log('Système de surveillance chargé et actif');
+  </script>
 </body>
 </html>
