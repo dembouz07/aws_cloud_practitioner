@@ -934,7 +934,10 @@
     let timerIntervalId = null;
     function startTimer() {
       if (!timerIntervalId) {
+        console.log('Timer démarré - Temps restant:', remainingSeconds, 'secondes');
         timerIntervalId = setInterval(tick, 1000);
+      } else {
+        console.log('Timer déjà actif');
       }
     }
 
@@ -1112,6 +1115,97 @@
       }
     });
 
+    // ============================================
+    // DÉTECTIONS SPÉCIFIQUES MOBILE/TACTILE
+    // ============================================
+    
+    // Détecter le changement d'application sur mobile
+    let lastVisibilityChange = Date.now();
+    document.addEventListener('visibilitychange', function() {
+      if (examStarted) {
+        const now = Date.now();
+        // Éviter les doubles détections
+        if (now - lastVisibilityChange > 1000) {
+          if (document.hidden) {
+            recordInfraction('Changement d\'application détecté');
+          }
+          lastVisibilityChange = now;
+        }
+      }
+    });
+
+    // Détecter le geste de capture d'écran sur mobile (Android/iOS)
+    let touchStartTime = 0;
+    let touchCount = 0;
+    
+    document.addEventListener('touchstart', function(e) {
+      if (!examStarted) return;
+      
+      touchCount = e.touches.length;
+      touchStartTime = Date.now();
+      
+      // Détecter 3 doigts (geste de capture sur certains appareils)
+      if (touchCount >= 3) {
+        recordInfraction('Geste de capture détecté');
+      }
+    });
+
+    document.addEventListener('touchend', function(e) {
+      if (!examStarted) return;
+      
+      const touchDuration = Date.now() - touchStartTime;
+      
+      // Détecter appui long (peut être une capture)
+      if (touchCount === 2 && touchDuration > 1000) {
+        recordInfraction('Geste suspect détecté');
+      }
+    });
+
+    // Détecter le partage d'écran sur mobile
+    if (navigator.share) {
+      const originalShare = navigator.share;
+      navigator.share = function() {
+        if (examStarted) {
+          recordInfraction('Tentative de partage détectée');
+          return Promise.reject(new Error('Partage bloqué pendant l\'examen'));
+        }
+        return originalShare.apply(this, arguments);
+      };
+    }
+
+    // Détecter la perte de focus sur mobile (changement d'app)
+    window.addEventListener('pagehide', function() {
+      if (examStarted) {
+        recordInfraction('Application mise en arrière-plan');
+      }
+    });
+
+    // Détecter le retour sur la page
+    window.addEventListener('pageshow', function(e) {
+      if (examStarted && e.persisted) {
+        recordInfraction('Retour sur l\'application');
+      }
+    });
+
+    // Bloquer le menu contextuel sur mobile (appui long)
+    let longPressTimer;
+    document.addEventListener('touchstart', function(e) {
+      if (!examStarted) return;
+      
+      longPressTimer = setTimeout(function() {
+        e.preventDefault();
+        recordInfraction('Appui long détecté');
+      }, 500);
+    });
+
+    document.addEventListener('touchend', function() {
+      clearTimeout(longPressTimer);
+    });
+
+    document.addEventListener('touchmove', function() {
+      clearTimeout(longPressTimer);
+    });
+
     // Détecter redimensionnement
     let lastWidth = window.innerWidth;
     let lastHeight = window.innerHeight;
@@ -1159,13 +1253,16 @@
         if (infractionCounter) infractionCounter.style.display = 'block';
         if (infractionCount) infractionCount.textContent = infractions;
         
+        // IMPORTANT : Démarrer le timer après restauration
+        if (typeof startTimer === 'function') {
+          console.log('Démarrage du timer après restauration');
+          startTimer();
+        }
+        
         if (infractions < MAX_INFRACTIONS) {
           recordInfraction('Actualisation de la page');
         }
         
-        if (typeof startTimer === 'function') {
-          startTimer();
-        }
         if (typeof initializeExam === 'function') {
           initializeExam(false);
         }
