@@ -35,12 +35,6 @@
       color: var(--ink);
       min-height: 100vh;
     }
-    body.exam-active {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
     .app-header {
       padding: 12px 14px 0;
       position: static;
@@ -687,16 +681,12 @@
         <h2>Prêt à commencer l'examen ?</h2>
         <p>Vous allez passer un examen simulé de 65 questions en 90 minutes.</p>
         <div style="background: #fff4ec; border-left: 4px solid var(--aws-orange); padding: 16px; border-radius: 12px; margin: 16px 0;">
-          <strong style="color: var(--ink-2); display: block; margin-bottom: 8px;">Règles de surveillance de l'examen :</strong>
+          <strong style="color: var(--ink-2); display: block; margin-bottom: 8px;">Déroulement de l'examen :</strong>
           <ul style="margin: 8px 0; padding-left: 20px; line-height: 1.8;">
             <li>Le chronomètre démarre dès que vous cliquez sur "Commencer"</li>
-            <li>Ne changez pas d'onglet pendant l'examen</li>
-            <li>Les captures d'écran sont détectées et bloquées</li>
-            <li>La copie de texte (Ctrl+C) est interdite</li>
-            <li>La sélection de texte est désactivée</li>
-            <li>Le clic droit est bloqué</li>
-            <li>Toute infraction déclenchera une alarme sonore</li>
-            <li>Après 3 infractions, l'examen sera automatiquement terminé</li>
+            <li>Vous disposez de 90 minutes pour répondre aux 65 questions</li>
+            <li>Vous pouvez naviguer librement entre les questions</li>
+            <li>Le corrigé s'affiche une fois l'examen soumis</li>
           </ul>
         </div>
         <button class="primary" id="startExamBtn" style="font-size: 18px; padding: 16px 32px; margin-top: 16px;">
@@ -946,359 +936,61 @@
 
   </script>
   
-  <!-- Système de surveillance d'examen -->
+  <!-- Gestion du démarrage et de la persistance de l'examen -->
   <script>
-    // ============================================
-    // SYSTÈME DE SURVEILLANCE D'EXAMEN - INTÉGRÉ
-    // ============================================
     let examStarted = false;
-    let infractions = 0;
-    const MAX_INFRACTIONS = 3;
-
-    // Créer et jouer une alarme sonore
-    function playAlarm() {
-      try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.value = 800;
-        oscillator.type = 'sine';
-        gainNode.gain.value = 0.3;
-        
-        oscillator.start();
-        setTimeout(() => oscillator.frequency.value = 600, 200);
-        setTimeout(() => oscillator.frequency.value = 800, 400);
-        setTimeout(() => oscillator.frequency.value = 600, 600);
-        setTimeout(() => {
-          oscillator.stop();
-          audioContext.close();
-        }, 800);
-      } catch (e) {
-        console.error('Erreur alarme:', e);
-      }
-    }
-
-    // Enregistrer une infraction
-    function recordInfraction(reason) {
-      if (!examStarted) return;
-      
-      infractions++;
-      localStorage.setItem('infractions', infractions);
-      
-      const infractionCountEl = document.getElementById('infractionCount');
-      const warningBanner = document.getElementById('warningBanner');
-      const infractionText = document.getElementById('infractionText');
-      
-      if (infractionCountEl) infractionCountEl.textContent = infractions;
-      const infractionCounter = document.getElementById('infractionCounter');
-      if (infractionCounter) infractionCounter.style.display = 'block';
-      
-      if (infractionText) infractionText.textContent = `${reason} (${infractions}/${MAX_INFRACTIONS})`;
-      if (warningBanner) warningBanner.classList.add('show');
-      
-      playAlarm();
-      
-      setTimeout(() => {
-        if (warningBanner) warningBanner.classList.remove('show');
-      }, 5000);
-      
-      if (infractions >= MAX_INFRACTIONS) {
-        setTimeout(() => {
-          alert('EXAMEN TERMINÉ\n\nVous avez commis 3 infractions. L\'examen est automatiquement terminé.\n\nRaison : Comportement suspect détecté.');
-          if (typeof finish === 'function') {
-            finish();
-          }
-          localStorage.clear();
-          examStarted = false;
-          infractions = 0;
-        }, 2000);
-      }
-    }
-
-    // Détecter changement d'onglet
-    document.addEventListener('visibilitychange', function() {
-      if (document.hidden && examStarted) {
-        recordInfraction('Changement d\'onglet détecté');
-      }
-    });
-
-    // Détecter perte de focus
-    window.addEventListener('blur', function() {
-      if (examStarted) {
-        recordInfraction('Fenêtre minimisée');
-      }
-    });
-
-    // Bloquer captures d'écran et copie
-    document.addEventListener('keydown', function(e) {
-      if (!examStarted) return;
-      
-      // Bloquer Ctrl+C (copie)
-      if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) {
-        e.preventDefault();
-        recordInfraction('Tentative de copie détectée');
-        return false;
-      }
-      
-      // Bloquer Ctrl+X (couper)
-      if (e.ctrlKey && (e.key === 'x' || e.key === 'X')) {
-        e.preventDefault();
-        recordInfraction('Tentative de copie détectée');
-        return false;
-      }
-      
-      // Bloquer Ctrl+A (tout sélectionner)
-      if (e.ctrlKey && (e.key === 'a' || e.key === 'A')) {
-        e.preventDefault();
-        recordInfraction('Tentative de sélection détectée');
-        return false;
-      }
-      
-      if (e.key === 'PrintScreen' || e.keyCode === 44) {
-        e.preventDefault();
-        recordInfraction('Capture d\'écran détectée');
-        return false;
-      }
-      
-      if (e.ctrlKey && e.shiftKey && (e.key === 'S' || e.key === 's')) {
-        e.preventDefault();
-        recordInfraction('Capture d\'écran détectée');
-        return false;
-      }
-      
-      if (e.metaKey && e.shiftKey && e.key === 's') {
-        e.preventDefault();
-        recordInfraction('Capture d\'écran détectée');
-        return false;
-      }
-      
-      if (e.key === 'F12' || e.keyCode === 123) {
-        e.preventDefault();
-        recordInfraction('Outils développeur détectés');
-        return false;
-      }
-      
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
-        e.preventDefault();
-        recordInfraction('Outils développeur détectés');
-        return false;
-      }
-    });
-
-    // Bloquer clic droit
-    document.addEventListener('contextmenu', function(e) {
-      if (examStarted) {
-        e.preventDefault();
-        recordInfraction('Clic droit détecté');
-        return false;
-      }
-    });
-
-    // Bloquer la copie via événement copy
-    document.addEventListener('copy', function(e) {
-      if (examStarted) {
-        e.preventDefault();
-        recordInfraction('Tentative de copie détectée');
-        return false;
-      }
-    });
-
-    // Bloquer la sélection de texte
-    document.addEventListener('selectstart', function(e) {
-      if (examStarted) {
-        e.preventDefault();
-        return false;
-      }
-    });
-
-    // ============================================
-    // DÉTECTIONS SPÉCIFIQUES MOBILE/TACTILE
-    // ============================================
-    
-    // Détecter le changement d'application sur mobile
-    let lastVisibilityChange = Date.now();
-    document.addEventListener('visibilitychange', function() {
-      if (examStarted) {
-        const now = Date.now();
-        // Éviter les doubles détections
-        if (now - lastVisibilityChange > 1000) {
-          if (document.hidden) {
-            recordInfraction('Changement d\'application détecté');
-          }
-          lastVisibilityChange = now;
-        }
-      }
-    });
-
-    // Détecter le geste de capture d'écran sur mobile (Android/iOS)
-    let touchStartTime = 0;
-    let touchCount = 0;
-    
-    document.addEventListener('touchstart', function(e) {
-      if (!examStarted) return;
-      
-      touchCount = e.touches.length;
-      touchStartTime = Date.now();
-      
-      // Détecter 3 doigts (geste de capture sur certains appareils)
-      if (touchCount >= 3) {
-        recordInfraction('Geste de capture détecté');
-      }
-    });
-
-    document.addEventListener('touchend', function(e) {
-      if (!examStarted) return;
-      
-      const touchDuration = Date.now() - touchStartTime;
-      
-      // Détecter appui long (peut être une capture)
-      if (touchCount === 2 && touchDuration > 1000) {
-        recordInfraction('Geste suspect détecté');
-      }
-    });
-
-    // Détecter le partage d'écran sur mobile
-    if (navigator.share) {
-      const originalShare = navigator.share;
-      navigator.share = function() {
-        if (examStarted) {
-          recordInfraction('Tentative de partage détectée');
-          return Promise.reject(new Error('Partage bloqué pendant l\'examen'));
-        }
-        return originalShare.apply(this, arguments);
-      };
-    }
-
-    // Détecter la perte de focus sur mobile (changement d'app)
-    window.addEventListener('pagehide', function() {
-      if (examStarted) {
-        recordInfraction('Application mise en arrière-plan');
-      }
-    });
-
-    // Détecter le retour sur la page
-    window.addEventListener('pageshow', function(e) {
-      if (examStarted && e.persisted) {
-        recordInfraction('Retour sur l\'application');
-      }
-    });
-
-    // Bloquer le menu contextuel sur mobile (appui long)
-    let longPressTimer;
-    document.addEventListener('touchstart', function(e) {
-      if (!examStarted) return;
-      
-      longPressTimer = setTimeout(function() {
-        e.preventDefault();
-        recordInfraction('Appui long détecté');
-      }, 500);
-    });
-
-    document.addEventListener('touchend', function() {
-      clearTimeout(longPressTimer);
-    });
-
-    document.addEventListener('touchmove', function() {
-      clearTimeout(longPressTimer);
-    });
-
-    // Détecter redimensionnement
-    let lastWidth = window.innerWidth;
-    let lastHeight = window.innerHeight;
-    window.addEventListener('resize', function() {
-      if (examStarted) {
-        const widthChange = Math.abs(window.innerWidth - lastWidth);
-        const heightChange = Math.abs(window.innerHeight - lastHeight);
-        
-        if (widthChange > 100 || heightChange > 100) {
-          recordInfraction('Redimensionnement suspect');
-        }
-        
-        lastWidth = window.innerWidth;
-        lastHeight = window.innerHeight;
-      }
-    });
 
     // Sauvegarder l'état toutes les secondes
     setInterval(() => {
       if (examStarted) {
         localStorage.setItem('exam_started', 'true');
-        localStorage.setItem('infractions', infractions);
+        if (typeof window.remainingSeconds !== 'undefined') {
+          localStorage.setItem('remaining_seconds', window.remainingSeconds);
+        }
       }
     }, 1000);
 
     // Restaurer l'état au chargement
     window.addEventListener('DOMContentLoaded', function() {
       const savedExamStarted = localStorage.getItem('exam_started');
-      const savedInfractions = localStorage.getItem('infractions');
-      
+
       if (savedExamStarted === 'true') {
         examStarted = true;
-        infractions = parseInt(savedInfractions) || 0;
-        
-        // Ajouter la classe pour bloquer la sélection
-        document.body.classList.add('exam-active');
-        
+
         const startScreen = document.getElementById('startScreen');
         const questionCard = document.getElementById('questionCard');
         if (startScreen) startScreen.style.display = 'none';
         if (questionCard) questionCard.style.display = 'block';
-        
-        const infractionCounter = document.getElementById('infractionCounter');
-        const infractionCount = document.getElementById('infractionCount');
-        if (infractionCounter) infractionCounter.style.display = 'block';
-        if (infractionCount) infractionCount.textContent = infractions;
-        
-        // IMPORTANT : Démarrer le timer après restauration
+
         if (typeof startTimer === 'function') {
-          console.log('Démarrage du timer après restauration');
           startTimer();
         }
-        
-        if (infractions < MAX_INFRACTIONS) {
-          recordInfraction('Actualisation de la page');
-        }
-        
         if (typeof initializeExam === 'function') {
           initializeExam(false);
         }
       }
-      
+
       // Bouton de démarrage
       const startBtn = document.getElementById('startExamBtn');
       if (startBtn) {
         startBtn.addEventListener('click', function() {
           examStarted = true;
-          infractions = 0;
-          
-          // Ajouter la classe pour bloquer la sélection
-          document.body.classList.add('exam-active');
-          
+
           localStorage.setItem('exam_started', 'true');
           localStorage.setItem('start_time', Date.now());
-          localStorage.setItem('infractions', '0');
-          
+
           document.getElementById('startScreen').style.display = 'none';
           document.getElementById('questionCard').style.display = 'block';
-          document.getElementById('infractionCounter').style.display = 'block';
-          
+
           if (typeof startTimer === 'function') {
             startTimer();
           }
           if (typeof initializeExam === 'function') {
             initializeExam(false);
           }
-          
-          console.log('Examen démarré - Surveillance activée');
         });
       }
     });
-
-    console.log('Système de surveillance chargé et actif');
   </script>
 </body>
 </html>
