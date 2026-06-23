@@ -1001,25 +1001,11 @@
 
     // Restaurer l'état au chargement
     window.addEventListener('DOMContentLoaded', function() {
-      const savedExamStarted = localStorage.getItem('exam_started');
+      // Toujours afficher l'écran d'accueil pour laisser choisir le mode (Examen ou Révision)
+      localStorage.removeItem('exam_started');
+      localStorage.removeItem('remaining_seconds');
 
-      if (savedExamStarted === 'true') {
-        examStarted = true;
-
-        const startScreen = document.getElementById('startScreen');
-        const questionCard = document.getElementById('questionCard');
-        if (startScreen) startScreen.style.display = 'none';
-        if (questionCard) questionCard.style.display = 'block';
-
-        if (typeof startTimer === 'function') {
-          startTimer();
-        }
-        if (typeof initializeExam === 'function') {
-          initializeExam(false);
-        }
-      }
-
-      // Bouton de démarrage
+      // Bouton de démarrage de l'examen chronométré
       const startBtn = document.getElementById('startExamBtn');
       if (startBtn) {
         startBtn.addEventListener('click', function() {
