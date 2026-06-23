@@ -483,6 +483,15 @@
       line-height: 1.48;
     }
     .explanation.show { display: block; }
+    .review-status {
+      margin-top: 14px;
+      font-weight: 800;
+      padding: 10px 14px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    .review-status.ok { background: #eefaf3; color: #0f7b6c; border: 1px solid #9fe0d3; }
+    .review-status.ko { background: #fff3f1; color: #b42318; border: 1px solid #f3b9b3; }
     .controls {
       display: flex;
       align-items: center;
@@ -689,11 +698,16 @@
             <li>Le corrigé s'affiche une fois l'examen soumis</li>
           </ul>
         </div>
-        <button class="primary" id="startExamBtn" style="font-size: 18px; padding: 16px 32px; margin-top: 16px;">
-          Commencer l'examen
-        </button>
+        <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:16px;">
+          <button class="primary" id="startExamBtn" style="font-size: 18px; padding: 16px 32px;">
+            Commencer l'examen
+          </button>
+          <button class="secondary" id="reviewModeBtn" style="font-size: 18px; padding: 16px 32px;">
+            Mode révision (sans chrono)
+          </button>
+        </div>
         <p class="small" style="margin-top: 16px; color: var(--muted);">
-          Assurez-vous d'être dans un environnement calme et sans distraction.
+          Mode examen : 90 minutes chronométrées, correction affichée à la fin. Mode révision : aucun chronomètre, correction immédiate avec explication après chaque réponse.
         </p>
       </section>
       
@@ -722,6 +736,8 @@
     let current = 0;
     let finished = false;
     let selections = [];
+    let reviewMode = false;
+    let revealed = [];
     let remainingSeconds = parseInt(localStorage.getItem('remaining_seconds')) || 90 * 60;
     window.remainingSeconds = remainingSeconds; // Exposer globalement pour exam-proctoring.js
     let drawCount = 0;
@@ -764,7 +780,7 @@
         const cls = ['qbtn'];
         if (i === current) cls.push('active');
         if (selections[i].size) cls.push('answered');
-        if (finished) cls.push(isCorrect(i) ? 'correct' : 'incorrect');
+        if (finished || (reviewMode && revealed[i])) cls.push(isCorrect(i) ? 'correct' : 'incorrect');
         return `<button class="${cls.join(' ')}" onclick="goTo(${i})">${i + 1}</button>`;
       }).join('');
       $('#answeredCount').textContent = answeredCount();
@@ -776,6 +792,12 @@
       const q = questions[current];
       const multiple = q.type === 'multiple';
       const typeLabel = multiple ? `QRM - ${q.answers.length} réponses` : 'QCM - 1 réponse';
+      const revealedNow = finished || (reviewMode && revealed[current]);
+      const reviewControl = (reviewMode && !finished)
+        ? (revealed[current]
+            ? `<div class="review-status ${isCorrect(current) ? 'ok' : 'ko'}">${isCorrect(current) ? 'Bonne réponse' : 'Réponse incorrecte'}</div>`
+            : `<button class="primary" id="verifyBtn" onclick="revealCurrent()" ${selections[current].size ? '' : 'disabled'} style="margin-top:14px;">Vérifier la réponse</button>`)
+        : '';
       questionCard.innerHTML = `
         <div class="question-head">
           <div><strong>Question ${current + 1} / ${questions.length}</strong><span class="points-badge">1 point</span><br><span class="small">${q.domain}</span></div>
@@ -786,7 +808,8 @@
           <div class="options">
             ${q.options.map((opt, idx) => renderOption(q, idx, opt)).join('')}
           </div>
-          <div class="explanation ${finished ? 'show' : ''}"><strong>Corrigé :</strong> ${q.answers.map(letter).join(', ')}<br>${escapeHtml(q.explanation)}</div>
+          ${reviewControl}
+          <div class="explanation ${revealedNow ? 'show' : ''}"><strong>Corrigé :</strong> ${q.answers.map(letter).join(', ')}<br>${escapeHtml(q.explanation)}</div>
         </div>
       `;
       $('#prevBtn').disabled = current === 0;
@@ -797,8 +820,9 @@
     function renderOption(q, idx, opt) {
       const inputType = q.type === 'multiple' ? 'checkbox' : 'radio';
       const checked = selections[current].has(idx) ? 'checked' : '';
+      const reveal = finished || (reviewMode && revealed[current]);
       let cls = 'option';
-      if (finished) {
+      if (reveal) {
         const selected = selections[current].has(idx);
         const correct = q.answers.includes(idx);
         if (selected && correct) cls += ' correct';
@@ -807,7 +831,7 @@
       }
       return `
         <label class="${cls}">
-          <input type="${inputType}" name="q${current}" value="${idx}" ${checked} ${finished ? 'disabled' : ''} onchange="toggleAnswer(${idx}, this.checked)" />
+          <input type="${inputType}" name="q${current}" value="${idx}" ${checked} ${reveal ? 'disabled' : ''} onchange="toggleAnswer(${idx}, this.checked)" />
           <span><strong>${letter(idx)}.</strong> ${escapeHtml(opt)}</span>
         </label>`;
     }
@@ -828,6 +852,24 @@
     $('#nextBtn').onclick = () => { if (current < questions.length - 1) goTo(current + 1); };
     $('#finishBtn').onclick = finish;
     $('#resetBtn').onclick = () => initializeExam(true);
+
+    function revealCurrent() {
+      if (selections[current].size === 0) return;
+      revealed[current] = true;
+      renderQuestion();
+    }
+
+    function startReview() {
+      reviewMode = true;
+      finished = false;
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('questionCard').style.display = 'block';
+      document.querySelectorAll('.exam-pill').forEach(el => {
+        el.innerHTML = '<span class="dot"></span>Mode révision · sans chronomètre';
+      });
+      initializeExam(false);
+    }
+    $('#reviewModeBtn').onclick = startReview;
 
     function finish() {
       finished = true;
@@ -870,6 +912,7 @@
     }
 
     function updateTimerDisplay() {
+      if (reviewMode) { $('#timer').textContent = 'Révision'; return; }
       const m = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
       const s = (remainingSeconds % 60).toString().padStart(2, '0');
       $('#timer').textContent = `${m}:${s}`;
@@ -895,6 +938,11 @@
         localStorage.removeItem('infractions');
         remainingSeconds = 90 * 60;
         window.remainingSeconds = remainingSeconds;
+        reviewMode = false;
+        revealed = [];
+        document.querySelectorAll('.exam-pill').forEach(el => {
+          el.innerHTML = '<span class="dot"></span>Mode examen · 90 min';
+        });
         
         // Réafficher l'écran de démarrage
         document.getElementById('startScreen').style.display = 'block';
@@ -910,6 +958,7 @@
       
       questions = buildExam();
       selections = questions.map(() => new Set());
+      revealed = questions.map(() => false);
       current = 0;
       finished = false;
       remainingSeconds = 90 * 60;
